@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prima Nota Padel</title>
+<style>
+  :root {
+    --bg: #f4f6f8; --card: #ffffff; --text: #1d2733; --muted: #6b7785;
+    --border: #dde3ea; --accent: #1f7a4d; --accent-soft: #e5f3ec;
+    --danger: #c0392b; --warn: #b9770e; --warn-soft: #fdf3e1;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); font-size: 14px; }
+  header { background: var(--accent); color: #fff; padding: 16px 24px; text-align: center; }
+  #nomeCircolo { font-size: 28px; font-weight: 700; margin: 0; outline: none; cursor: text;
+                 display: inline-block; min-width: 200px; border-bottom: 1px dashed transparent; }
+  #nomeCircolo:hover, #nomeCircolo:focus { border-bottom-color: rgba(255,255,255,.6); }
+  header .sub { opacity: .85; font-size: 13px; margin-top: 4px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; padding: 16px 24px;
+             background: var(--card); border-bottom: 1px solid var(--border); }
+  .toolbar label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  input, select { font: inherit; padding: 7px 9px; border: 1px solid var(--border); border-radius: 6px; background: #fff; color: var(--text); }
+  button { font: inherit; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border);
+           background: #fff; cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  button.danger { color: var(--danger); }
+  button.small { padding: 3px 8px; font-size: 12px; }
+  .totali { margin-left: auto; display: flex; flex-wrap: wrap; gap: 18px; }
+  .pren .nomep { font-weight: 600; font-size: 14px; margin-top: 2px; }
+  .gratuita { color: #2c6fbb; font-style: italic; }
+  .sospesa { color: #8e44ad; font-weight: 600; }
+  .saldata { color: #8e44ad; }
+  .movimento.sospesi h2 { background: #f3eaf8; }
+  .movimento.sospesi h2 .tot { color: #8e44ad; }
+  .movimento.sospesi td.imp { color: #8e44ad; }
+  .movimento.sospesi td select { padding: 4px 6px; }
+  .nomeq { display: inline-block; min-width: 90px; padding: 1px 4px; margin-left: -4px; border-radius: 4px; outline: none; cursor: text; }
+  .nomeq:hover { background: #eef1f4; }
+  .nomeq:focus { background: #fff; box-shadow: 0 0 0 2px var(--accent); }
+  .nomeq:empty::before { content: attr(data-ph); color: var(--muted); }
+  .totali div { text-align: right; }
+  .totali .v { font-size: 18px; font-weight: 700; }
+  .totali .l { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+  main { padding: 20px 24px; overflow-x: auto; }
+  .campi { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(280px, 1fr); gap: 16px; }
+  .campo { background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; }
+  .campo h2 { margin: 0; padding: 12px 14px; font-size: 17px; background: var(--accent-soft);
+              border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; }
+  .campo h2 .tot { font-size: 14px; color: var(--accent); }
+  .campo .lista { padding: 10px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .vuoto { color: var(--muted); font-style: italic; text-align: center; padding: 20px 0; }
+  .pren { border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+  .pren.incompleta { border-color: #f0c36d; background: var(--warn-soft); }
+  .pren .ora { font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
+  .pren .azioni { display: flex; gap: 4px; }
+  .pren table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
+  .pren td { padding: 3px 2px; border-top: 1px solid #eef1f4; }
+  .pren td.imp { text-align: right; white-space: nowrap; }
+  .pren td.met { color: var(--muted); font-size: 11px; width: 60px; }
+  .nonpag { color: var(--warn); font-weight: 600; }
+  .pren .totp { text-align: right; font-weight: 600; margin-top: 4px; }
+  .nota { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .campo .add { margin: 0 10px 10px; }
+
+  .movimenti { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+  .movimento { background: var(--card); border: 1px solid var(--border); border-radius: 10px; align-self: start; }
+  .movimento h2 { margin: 0; padding: 12px 14px; font-size: 17px; background: #fbeceb; border-radius: 10px 10px 0 0;
+               display: flex; justify-content: space-between; align-items: center; }
+  .movimento h2 .tot { font-size: 14px; color: var(--danger); }
+  .movimento form { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--border); align-items: flex-end; }
+  .movimento form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .movimento table { width: 100%; border-collapse: collapse; }
+  .movimento th, .movimento td { padding: 8px 14px; text-align: left; border-bottom: 1px solid #eef1f4; }
+  .movimento th { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; }
+  .movimento td.imp, .movimento th.imp { text-align: right; white-space: nowrap; }
+  .movimento td.imp { color: var(--danger); font-weight: 600; }
+  .movimento.entrate h2 { background: var(--accent-soft); }
+  .movimento.entrate h2 .tot, .movimento.entrate td.imp { color: var(--accent); }
+  .pos { color: var(--accent); }
+  .movimento.pos-lista { margin-top: 16px; }
+  .movimento.pos-lista h2 { background: #e8effa; }
+  .movimento.pos-lista h2 .tot { color: #2c6fbb; }
+  .movimento.pos-lista td.imp.entrata { color: var(--accent); }
+  .movimento.pos-lista tfoot td { font-weight: 700; border-bottom: none; }
+  .neg { color: var(--danger); }
+
+  dialog { border: none; border-radius: 12px; padding: 0; width: min(560px, 95vw); box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(0,0,0,.35); }
+  .dlg-h { padding: 14px 18px; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; }
+  .dlg-b { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; gap: 10px; }
+  .row label { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .quote { display: grid; grid-template-columns: 24px 1fr 90px 90px 50px; gap: 6px; align-items: center; }
+  .quote .hd { font-size: 11px; color: var(--muted); }
+  .quote input[type=text], .quote input[type=number], .quote select { width: 100%; }
+  .dlg-f { padding: 12px 18px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
+  .err { color: var(--danger); font-size: 13px; min-height: 1em; }
+
+  @media print {
+    .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
+    body { background: #fff; }
+    .campi { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="nomeCircolo" contenteditable="true" spellcheck="false" title="Clicca per modificare il nome del circolo"></h1>
+  <div class="sub">Prima nota — <span id="dataLabel"></span></div>
+</header>
+
+<div class="toolbar">
+  <label>Data
+    <input type="date" id="data">
+  </label>
+  <label>Numero campi
+    <input type="number" id="numCampi" min="1" max="20" style="width:90px">
+  </label>
+  <label>Quota predefinita (€)
+    <input type="number" id="quotaDef" min="0" step="0.5" style="width:110px">
+  </label>
+  <button class="primary" id="btnNuova">+ Nuova prenotazione</button>
+  <button id="btnStampa">Stampa</button>
+  <div class="totali">
+    <div><div class="v" id="totContanti">€ 0,00</div><div class="l">Contanti</div></div>
+    <div><div class="v" id="totPos">€ 0,00</div><div class="l">POS</div></div>
+    <div><div class="v" id="totApp">€ 0,00</div><div class="l">App</div></div>
+    <div><div class="v" id="numGratuite">0</div><div class="l">Omaggi / Staff</div></div>
+    <div><div class="v" id="totDaInc">€ 0,00</div><div class="l">Da incassare</div></div>
+    <div><div class="v" id="totSospesi" style="color:#8e44ad">€ 0,00</div><div class="l">In sospeso (tutte)</div></div>
+    <div><div class="v" id="totGiorno">€ 0,00</div><div class="l">Totale incassato</div></div>
+    <div><div class="v pos" id="totEntrate">€ 0,00</div><div class="l">di cui entrate varie</div></div>
+    <div><div class="v neg" id="totUscite">€ 0,00</div><div class="l">Uscite</div></div>
+    <div><div class="v" id="saldoCassa">€ 0,00</div><div class="l">Saldo cassa contanti</div></div>
+  </div>
+</div>
+
+<main>
+  <div class="campi" id="campi"></div>
+
+  <div class="movimenti">
+    <section class="movimento entrate" id="secEntrate"></section>
+    <section class="movimento uscite" id="secUscite"></section>
+  </div>
+
+  <section class="movimento sospesi" style="margin-top:16px">
+    <h2>Quote in sospeso (tutte le date) <span class="tot" id="totSospesiSez">€ 0,00</span></h2>
+    <div id="listaSospesi"></div>
+  </section>
+
+  <section class="movimento pos-lista">
+    <h2>Movimenti POS del giorno <span class="tot" id="totPosLista">€ 0,00</span></h2>
+    <div id="listaPos"></div>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="frm">
+    <div class="dlg-h" id="dlgTitolo">Nuova prenotazione</div>
+    <div class="dlg-b">
+      <div class="row">
+        <label>Nome prenotazione <input type="text" id="fNome" required placeholder="Es. Rossi"></label>
+      </div>
+      <div class="row">
+        <label>Campo <select id="fCampo"></select></label>
+        <label>Dalle <input type="time" id="fDalle" required step="900"></label>
+        <label>Alle <input type="time" id="fAlle" required step="900"></label>
+      </div>
+      <div class="quote" id="quote">
+        <span class="hd">#</span><span class="hd">Giocatore</span><span class="hd">Importo €</span><span class="hd">Metodo</span><span class="hd">Pagato</span>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)">Note
+        <input type="text" id="fNote">
+      </label>
+      <div class="err" id="err"></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" id="btnAnnulla">Annulla</button>
+      <button type="submit" class="primary" id="btnSalva">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const KEY = 'padel-prima-nota-v1';
+const METODI = ['Contanti', 'POS', 'App', 'Omaggio', 'Staff', 'Sospeso'];
+const GRATUITI = ['Omaggio', 'Staff'];
+const eur = n => '€ ' + (Number(n) || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const oggi = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+
+let db;
+try { db = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+if (!db) db = { nomeCircolo: 'Circolo Padel', numCampi: 3, quotaDef: 10, prenotazioni: [] };
+if (!db.uscite) db.uscite = [];
+if (!db.entrate) db.entrate = [];
+const salvaDb = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { alert('Impossibile salvare i dati'); } };
+
+const $ = id => document.getElementById(id);
+let dataSel = oggi();
+let modificaId = null, modificaQuote = null;
+
+// ---- intestazione / impostazioni ----
+$('nomeCircolo').textContent = db.nomeCircolo;
+$('nomeCircolo').addEventListener('blur', e => { db.nomeCircolo = e.target.textContent.trim() || 'Circolo Padel'; e.target.textContent = db.nomeCircolo; salvaDb(); });
+$('nomeCircolo').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+$('data').value = dataSel;
+$('data').addEventListener('change', e => { dataSel = e.target.value || oggi(); render(); });
+$('numCampi').value = db.numCampi;
+$('numCampi').addEventListener('change', e => {
+  const n = Math.max(1, Math.min(20, parseInt(e.target.value) || 1));
+  const occupati = db.prenotazioni.filter(p => p.data === dataSel && p.campo > n);
+  if (occupati.length && !confirm(`Ci sono ${occupati.length} prenotazioni nei campi oltre il ${n} per questa data: resteranno salvate ma non visibili. Continuare?`)) {
+    e.target.value = db.numCampi; return;
+  }
+  db.numCampi = n; e.target.value = n; salvaDb(); render();
+});
+$('quotaDef').value = db.quotaDef;
+$('quotaDef').addEventListener('change', e => { db.quotaDef = parseFloat(e.target.value) || 0; salvaDb(); });
+$('btnStampa').addEventListener('click', () => window.print());
+$('btnNuova').addEventListener('click', () => apriDialog());
+
+// ---- form quote ----
+const qBox = $('quote');
+for (let i = 0; i < 4; i++) {
+  qBox.insertAdjacentHTML('beforeend', `
+    <span>${i + 1}</span>
+    <input type="text" id="qNome${i}" placeholder="Nome giocatore ${i + 1}">
+    <input type="number" id="qImp${i}" min="0" step="0.5">
+    <select id="qMet${i}">${METODI.map(m => `<option>${m}</option>`).join('')}</select>
+    <input type="checkbox" id="qPag${i}">`);
+  $('qMet' + i).addEventListener('change', () => aggiornaQuotaGratuita(i, true));
+}
+
+// Omaggio e Staff: quota gratuita, importo 0 e non "da incassare"
+function aggiornaQuotaGratuita(i, cambioUtente) {
+  const metodo = $('qMet' + i).value;
+  const gratuita = GRATUITI.includes(metodo), sospeso = metodo === 'Sospeso';
+  if (gratuita) { $('qImp' + i).value = 0; $('qPag' + i).checked = true; }
+  else if (cambioUtente && !(parseFloat($('qImp' + i).value) > 0)) { $('qImp' + i).value = db.quotaDef; $('qPag' + i).checked = false; }
+  if (sospeso) $('qPag' + i).checked = false;
+  // una quota in sospeso già saldata non si può più cambiare da qui
+  const saldata = !!(modificaQuote && modificaQuote[i] && modificaQuote[i].saldo);
+  $('qMet' + i).disabled = saldata;
+  $('qImp' + i).disabled = gratuita || saldata;
+  $('qPag' + i).disabled = gratuita || sospeso;
+  $('qMet' + i).title = saldata ? 'Quota in sospeso già saldata: per modificarla elimina il saldo dalle Entrate varie' : '';
+}
+
+function apriDialog(campo, p) {
+  modificaId = p ? p.id : null;
+  modificaQuote = p ? p.quote : null;
+  $('dlgTitolo').textContent = p ? 'Modifica prenotazione' : 'Nuova prenotazione';
+  $('fCampo').innerHTML = Array.from({ length: db.numCampi }, (_, i) => `<option value="${i + 1}">Campo ${i + 1}</option>`).join('');
+  $('fCampo').value = p ? p.campo : (campo || 1);
+  $('fNome').value = p ? (p.nome || '') : '';
+  $('fDalle').value = p ? p.dalle : '';
+  $('fAlle').value = p ? p.alle : '';
+  $('fNote').value = p ? (p.note || '') : '';
+  for (let i = 0; i < 4; i++) {
+    const q = p ? p.quote[i] : { nome: '', importo: db.quotaDef, metodo: 'Contanti', pagato: false };
+    $('qNome' + i).value = q.nome; $('qImp' + i).value = q.importo;
+    $('qMet' + i).value = q.metodo; $('qPag' + i).checked = q.pagato;
+    aggiornaQuotaGratuita(i, false);
+  }
+  $('err').textContent = '';
+  $('dlg').showModal();
+  $('fNome').focus();
+}
+$('btnAnnulla').addEventListener('click', () => $('dlg').close());
+
+// quando si imposta "dalle", proponi "alle" a +1h30
+$('fDalle').addEventListener('change', () => {
+  if ($('fAlle').value || !$('fDalle').value) return;
+  const [h, m] = $('fDalle').value.split(':').map(Number);
+  const t = (h * 60 + m + 90) % 1440;
+  $('fAlle').value = String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+});
+
+$('frm').addEventListener('submit', e => {
+  e.preventDefault();
+  const campo = parseInt($('fCampo').value), dalle = $('fDalle').value, alle = $('fAlle').value;
+  const nome = $('fNome').value.trim();
+  if (!nome) return $('err').textContent = 'Inserisci il nome della prenotazione.';
+  if (!dalle || !alle) return $('err').textContent = 'Inserisci orario di inizio e fine.';
+  if (alle <= dalle) return $('err').textContent = "L'orario di fine deve essere successivo all'inizio.";
+  const sovrapp = db.prenotazioni.find(p => p.id !== modificaId && p.data === dataSel && p.campo === campo && dalle < p.alle && alle > p.dalle);
+  if (sovrapp) return $('err').textContent = `Il Campo ${campo} è già occupato dalle ${sovrapp.dalle} alle ${sovrapp.alle}.`;
+  const quote = [0, 1, 2, 3].map(i => {
+    const metodo = $('qMet' + i).value, gratuita = GRATUITI.includes(metodo), sospeso = metodo === 'Sospeso';
+    const q = { nome: $('qNome' + i).value.trim(), importo: gratuita ? 0 : (parseFloat($('qImp' + i).value) || 0),
+                metodo, pagato: gratuita || (!sospeso && $('qPag' + i).checked) };
+    const prec = modificaQuote && modificaQuote[i];
+    if (sospeso && prec && prec.saldo) q.saldo = prec.saldo;
+    return q;
+  });
+  const rec = { id: modificaId || Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data: dataSel, nome, campo, dalle, alle, quote, note: $('fNote').value.trim() };
+  if (modificaId) db.prenotazioni = db.prenotazioni.map(p => p.id === modificaId ? rec : p);
+  else db.prenotazioni.push(rec);
+  salvaDb(); $('dlg').close(); render();
+});
+
+function elimina(id) {
+  const p = db.prenotazioni.find(x => x.id === id);
+  const nSosp = p.quote.filter(q => q.metodo === 'Sospeso' && !q.saldo).length;
+  const avviso = nSosp ? `\nAttenzione: ha ${nSosp} quote in sospeso non ancora incassate, che verranno eliminate.` : '';
+  if (!confirm(`Eliminare la prenotazione ${p.nome || ''} del Campo ${p.campo} dalle ${p.dalle} alle ${p.alle}?${avviso}`)) return;
+  db.prenotazioni = db.prenotazioni.filter(x => x.id !== id);
+  salvaDb(); render();
+}
+
+function togglePagato(id, i) {
+  const p = db.prenotazioni.find(x => x.id === id);
+  p.quote[i].pagato = !p.quote[i].pagato;
+  salvaDb(); render();
+}
+
+// ---- entrate varie e uscite di cassa ----
+const MOV = {
+  entrate: { titolo: 'Entrate varie', singolare: "l'entrata", btn: '+ Aggiungi entrata', segno: '+', vuoto: 'Nessuna entrata registrata',
+             esempio: 'Es. noleggio racchette', metodi: ['Contanti', 'POS', 'App', 'Bonifico'],
+             categorie: ['Bar', 'Lezioni', 'Noleggio racchette', 'Vendita materiale', 'Tornei', 'Quote associative', 'Altro'] },
+  uscite:  { titolo: 'Uscite di cassa', singolare: "l'uscita", btn: '+ Aggiungi uscita', segno: '−', vuoto: 'Nessuna uscita registrata',
+             esempio: 'Es. acquisto palline', metodi: ['Contanti', 'POS', 'Bonifico'],
+             categorie: ['Materiale', 'Bar', 'Pulizie', 'Manutenzione', 'Personale', 'Utenze', 'Altro'] }
+};
+for (const tipo of Object.keys(MOV)) {
+  const c = MOV[tipo], sec = $(tipo === 'entrate' ? 'secEntrate' : 'secUscite');
+  sec.innerHTML = `
+    <h2>${c.titolo} <span class="tot" id="tot_${tipo}">€ 0,00</span></h2>
+    <form id="frm_${tipo}">
+      <label style="flex:2;min-width:160px">Descrizione <input type="text" id="desc_${tipo}" required placeholder="${c.esempio}"></label>
+      <label>Categoria <select id="cat_${tipo}">${c.categorie.map(x => `<option>${x}</option>`).join('')}</select></label>
+      <label>Importo € <input type="number" id="imp_${tipo}" min="0.01" step="0.01" required style="width:100px"></label>
+      <label>Metodo <select id="met_${tipo}">${c.metodi.map(x => `<option>${x}</option>`).join('')}</select></label>
+      <button type="submit" class="primary">${c.btn}</button>
+    </form>
+    <div id="lista_${tipo}"></div>`;
+  $('frm_' + tipo).addEventListener('submit', e => {
+    e.preventDefault();
+    const importo = parseFloat($('imp_' + tipo).value);
+    if (!(importo > 0)) return;
+    db[tipo].push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data: dataSel,
+      ora: new Date().toTimeString().slice(0, 5), descrizione: $('desc_' + tipo).value.trim(),
+      categoria: $('cat_' + tipo).value, importo, metodo: $('met_' + tipo).value });
+    salvaDb();
+    $('desc_' + tipo).value = ''; $('imp_' + tipo).value = ''; $('desc_' + tipo).focus();
+    render();
+  });
+}
+function eliminaMov(tipo, id) {
+  const u = db[tipo].find(x => x.id === id);
+  const avviso = u.quotaRef ? '\nLa quota tornerà in sospeso.' : '';
+  if (!confirm(`Eliminare ${MOV[tipo].singolare} "${u.descrizione}" di ${eur(u.importo)}?${avviso}`)) return;
+  if (u.quotaRef) {
+    const p = db.prenotazioni.find(x => x.id === u.quotaRef.id);
+    if (p) delete p.quote[u.quotaRef.i].saldo;
+  }
+  db[tipo] = db[tipo].filter(x => x.id !== id);
+  salvaDb(); render();
+}
+function renderMov(tipo) {
+  const c = MOV[tipo];
+  const lista = db[tipo].filter(u => u.data === dataSel).sort((a, b) => a.ora.localeCompare(b.ora));
+  $('lista_' + tipo).innerHTML = lista.length
+    ? `<table><thead><tr><th>Ora</th><th>Descrizione</th><th>Categoria</th><th>Metodo</th><th class="imp">Importo</th><th></th></tr></thead><tbody>${
+        lista.map(u => `<tr><td>${u.ora}</td><td>${esc(u.descrizione)}</td><td>${u.categoria}</td><td>${u.metodo}</td>
+          <td class="imp">${c.segno} ${eur(u.importo)}</td>
+          <td style="width:40px"><button class="small danger" onclick="eliminaMov('${tipo}','${u.id}')">✕</button></td></tr>`).join('')
+      }</tbody></table>`
+    : `<div class="vuoto">${c.vuoto}</div>`;
+  const tot = lista.reduce((s, u) => s + u.importo, 0);
+  $('tot_' + tipo).textContent = eur(tot);
+  const perMetodo = m => lista.filter(u => u.metodo === m).reduce((s, u) => s + u.importo, 0);
+  return { tot, perMetodo };
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---- render ----
+function render() {
+  $('dataLabel').textContent = new Date(dataSel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const delGiorno = db.prenotazioni.filter(p => p.data === dataSel);
+  let contanti = 0, pos = 0, app = 0, daInc = 0, gratuite = 0;
+  let html = '';
+  for (let c = 1; c <= db.numCampi; c++) {
+    const lista = delGiorno.filter(p => p.campo === c).sort((a, b) => a.dalle.localeCompare(b.dalle));
+    let totCampo = 0;
+    const items = lista.map(p => {
+      let totP = 0, incompleta = false;
+      const righe = p.quote.map((q, i) => {
+        const gratuita = GRATUITI.includes(q.metodo), sospeso = q.metodo === 'Sospeso';
+        if (gratuita) gratuite++;
+        else if (sospeso) { if (!q.saldo) incompleta = true; }
+        else if (q.pagato) {
+          totP += q.importo;
+          if (q.metodo === 'POS') pos += q.importo; else if (q.metodo === 'App') app += q.importo; else contanti += q.importo;
+        } else { incompleta = true; daInc += q.importo; }
+        return `<tr>
+          <td><span class="nomeq ${q.nome ? '' : 'vuota'}" contenteditable="true" spellcheck="false"
+                data-id="${p.id}" data-i="${i}" data-ph="Quota ${i + 1}" title="Clicca per scrivere il nome del giocatore">${esc(q.nome || '')}</span></td>
+          <td class="met">${q.metodo}</td>
+          <td class="imp ${gratuita ? 'gratuita' : sospeso ? (q.saldo ? 'saldata' : 'sospesa') : q.pagato ? '' : 'nonpag'}"
+              title="${sospeso && q.saldo ? `Saldata il ${dataIt(q.saldo.data)} (${q.saldo.metodo})` : ''}">${gratuita ? q.metodo : eur(q.importo)}${sospeso && q.saldo ? ' ✓' : ''}</td>
+          <td style="width:24px;text-align:center">${gratuita || sospeso ? '' : `<input type="checkbox" title="Pagato" ${q.pagato ? 'checked' : ''} onchange="togglePagato('${p.id}',${i})">`}</td>
+        </tr>`;
+      }).join('');
+      totCampo += totP;
+      return `<div class="pren ${incompleta ? 'incompleta' : ''}">
+        <div class="ora"><span>${p.dalle} – ${p.alle}</span>
+          <span class="azioni"><button class="small" onclick="modifica('${p.id}')">Modifica</button><button class="small danger" onclick="elimina('${p.id}')">✕</button></span></div>
+        <div class="nomep">${p.nome ? esc(p.nome) : '<span style="color:var(--muted)">Senza nome</span>'}</div>
+        <table>${righe}</table>
+        <div class="totp">Incassato: ${eur(totP)}</div>
+        ${p.note ? `<div class="nota">${esc(p.note)}</div>` : ''}
+      </div>`;
+    }).join('');
+    html += `<section class="campo">
+      <h2>Campo ${c} <span class="tot">${eur(totCampo)}</span></h2>
+      <div class="lista">${items || '<div class="vuoto">Nessuna prenotazione</div>'}</div>
+      <button class="add" onclick="apriDialog(${c})">+ Aggiungi al Campo ${c}</button>
+    </section>`;
+  }
+  $('campi').innerHTML = html;
+  $('totDaInc').textContent = eur(daInc);
+  const ent = renderMov('entrate'), usc = renderMov('uscite');
+  contanti += ent.perMetodo('Contanti'); pos += ent.perMetodo('POS'); app += ent.perMetodo('App');
+  $('totContanti').textContent = eur(contanti);
+  $('totPos').textContent = eur(pos);
+  $('totApp').textContent = eur(app);
+  $('numGratuite').textContent = gratuite;
+  $('totGiorno').textContent = eur(contanti + pos + app + ent.perMetodo('Bonifico'));
+  $('totEntrate').textContent = eur(ent.tot);
+  $('totUscite').textContent = eur(usc.tot);
+  const saldo = contanti - usc.perMetodo('Contanti');
+  $('saldoCassa').textContent = eur(saldo);
+  $('saldoCassa').classList.toggle('neg', saldo < 0);
+  renderSospesi();
+  renderPos();
+}
+
+const dataIt = d => new Date(d + 'T12:00').toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+// ---- quote in sospeso ----
+function renderSospesi() {
+  const righe = [];
+  db.prenotazioni.forEach(p => p.quote.forEach((q, i) => {
+    if (q.metodo === 'Sospeso' && !q.saldo) righe.push({ p, q, i });
+  }));
+  righe.sort((a, b) => (a.p.data + a.p.dalle).localeCompare(b.p.data + b.p.dalle));
+  const tot = righe.reduce((s, r) => s + r.q.importo, 0);
+  $('totSospesi').textContent = eur(tot);
+  $('totSospesiSez').textContent = eur(tot);
+  $('listaSospesi').innerHTML = righe.length
+    ? `<table><thead><tr><th>Data</th><th>Campo</th><th>Prenotazione</th><th>Giocatore</th><th class="imp">Importo</th><th>Incassa con</th><th></th></tr></thead><tbody>${
+        righe.map(({ p, q, i }) => `<tr>
+          <td>${dataIt(p.data)}</td><td>Campo ${p.campo}</td><td>${esc(p.nome || '')} ${p.dalle}–${p.alle}</td>
+          <td>${q.nome ? esc(q.nome) : `<span style="color:var(--muted)">Quota ${i + 1}</span>`}</td>
+          <td class="imp">${eur(q.importo)}</td>
+          <td><select id="sm_${p.id}_${i}">${MOV.entrate.metodi.map(m => `<option>${m}</option>`).join('')}</select></td>
+          <td style="width:80px"><button class="small primary" onclick="saldaSospeso('${p.id}',${i})">Incassa</button></td></tr>`).join('')
+      }</tbody></table>`
+    : '<div class="vuoto">Nessuna quota in sospeso</div>';
+}
+
+// l'incasso di una quota in sospeso viene registrato come entrata nella data selezionata
+function saldaSospeso(id, i) {
+  const p = db.prenotazioni.find(x => x.id === id), q = p.quote[i];
+  const metodo = $(`sm_${id}_${i}`).value;
+  if (!confirm(`Incassare ${eur(q.importo)} da ${q.nome || 'Quota ' + (i + 1)} (${p.nome || ''} del ${dataIt(p.data)}) con ${metodo}, nella prima nota del ${dataIt(dataSel)}?`)) return;
+  const ent = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data: dataSel,
+    ora: new Date().toTimeString().slice(0, 5),
+    descrizione: `Saldo sospeso ${q.nome || 'Quota ' + (i + 1)} · ${p.nome || ''} Campo ${p.campo} del ${dataIt(p.data)}`,
+    categoria: 'Quote in sospeso', importo: q.importo, metodo, quotaRef: { id, i } };
+  db.entrate.push(ent);
+  q.saldo = { data: dataSel, metodo, entrataId: ent.id };
+  salvaDb(); render();
+}
+
+// ---- nome giocatore modificabile direttamente nella colonna ----
+document.addEventListener('keydown', e => {
+  if (!e.target.classList || !e.target.classList.contains('nomeq')) return;
+  if (e.key === 'Enter' || e.key === 'Tab') {
+    e.preventDefault();
+    const tutti = [...document.querySelectorAll('.nomeq')];
+    const prossimo = tutti[tutti.indexOf(e.target) + (e.shiftKey ? -1 : 1)];
+    if (e.key === 'Tab' && prossimo) prossimo.focus(); else e.target.blur();
+  } else if (e.key === 'Escape') {
+    const p = db.prenotazioni.find(x => x.id === e.target.dataset.id);
+    e.target.textContent = p.quote[e.target.dataset.i].nome; e.target.blur();
+  }
+});
+document.addEventListener('focusout', e => {
+  if (!e.target.classList || !e.target.classList.contains('nomeq')) return;
+  const p = db.prenotazioni.find(x => x.id === e.target.dataset.id);
+  if (!p) return;
+  const nome = e.target.textContent.replace(/\s+/g, ' ').trim();
+  e.target.textContent = nome;
+  const q = p.quote[e.target.dataset.i];
+  if (q.nome === nome) return;
+  q.nome = nome;
+  salvaDb();
+  renderPos();
+});
+
+// ---- elenco movimenti POS ----
+function renderPos() {
+  const righe = [];
+  db.prenotazioni.filter(p => p.data === dataSel).forEach(p => p.quote.forEach((q, i) => {
+    if (q.metodo === 'POS' && q.pagato && q.importo > 0)
+      righe.push({ ora: p.dalle, origine: 'Campo ' + p.campo,
+        descr: `${p.nome || 'Prenotazione'} ${p.dalle}–${p.alle} · ${q.nome || 'Quota ' + (i + 1)}`, importo: q.importo });
+  }));
+  db.entrate.filter(u => u.data === dataSel && u.metodo === 'POS').forEach(u =>
+    righe.push({ ora: u.ora, origine: 'Entrata · ' + u.categoria, descr: u.descrizione, importo: u.importo }));
+  db.uscite.filter(u => u.data === dataSel && u.metodo === 'POS').forEach(u =>
+    righe.push({ ora: u.ora, origine: 'Uscita · ' + u.categoria, descr: u.descrizione, importo: -u.importo }));
+  righe.sort((a, b) => a.ora.localeCompare(b.ora));
+  const tot = righe.reduce((s, r) => s + r.importo, 0);
+  $('totPosLista').textContent = eur(tot);
+  $('listaPos').innerHTML = righe.length
+    ? `<table><thead><tr><th>#</th><th>Ora</th><th>Origine</th><th>Descrizione</th><th class="imp">Importo</th></tr></thead><tbody>${
+        righe.map((r, n) => `<tr><td>${n + 1}</td><td>${r.ora}</td><td>${esc(r.origine)}</td><td>${esc(r.descr)}</td>
+          <td class="imp ${r.importo >= 0 ? 'entrata' : ''}">${r.importo >= 0 ? '+' : '−'} ${eur(Math.abs(r.importo))}</td></tr>`).join('')
+      }</tbody><tfoot><tr><td colspan="4">Totale POS (${righe.length} movimenti)</td><td class="imp ${tot >= 0 ? 'entrata' : ''}">${eur(tot)}</td></tr></tfoot></table>`
+    : '<div class="vuoto">Nessun movimento POS</div>';
+}
+function modifica(id) { const p = db.prenotazioni.find(x => x.id === id); apriDialog(p.campo, p); }
+
+render();
+</script>
+</body>
+</html>
