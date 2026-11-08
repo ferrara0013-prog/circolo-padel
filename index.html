@@ -27,7 +27,8 @@
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
   button.danger { color: var(--danger); }
   button.small { padding: 3px 8px; font-size: 12px; }
-  .totali { margin-left: auto; display: flex; flex-wrap: wrap; gap: 18px; }
+  .totali { width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+  .totali > div { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
   .pren .nomep { font-weight: 600; font-size: 14px; margin-top: 2px; }
   .gratuita { color: #2c6fbb; font-style: italic; }
   .sospesa { color: #8e44ad; font-weight: 600; }
@@ -40,11 +41,11 @@
   .nomeq:hover { background: #eef1f4; }
   .nomeq:focus { background: #fff; box-shadow: 0 0 0 2px var(--accent); }
   .nomeq:empty::before { content: attr(data-ph); color: var(--muted); }
-  .totali div { text-align: right; }
-  .totali .v { font-size: 18px; font-weight: 700; }
-  .totali .l { font-size: 11px; color: var(--muted); text-transform: uppercase; }
-  main { padding: 20px 24px; overflow-x: auto; }
-  .campi { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(280px, 1fr); gap: 16px; }
+  .totali .v { font-size: 18px; font-weight: 700; white-space: nowrap; }
+  .totali .l { font-size: 10.5px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  main { padding: 20px 24px; }
+  .campi { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; align-items: start; }
+  #campiNav { display: none; }
   .campo { background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; flex-direction: column; }
   .campo h2 { margin: 0; padding: 12px 14px; font-size: 17px; background: var(--accent-soft);
               border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; }
@@ -64,7 +65,7 @@
   .nota { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .campo .add { margin: 0 10px 10px; }
 
-  .movimenti { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+  .movimenti { margin-top: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 16px; }
   .movimento { background: var(--card); border: 1px solid var(--border); border-radius: 10px; align-self: start; }
   .movimento h2 { margin: 0; padding: 12px 14px; font-size: 17px; background: #fbeceb; border-radius: 10px 10px 0 0;
                display: flex; justify-content: space-between; align-items: center; }
@@ -97,6 +98,109 @@
   .quote input[type=text], .quote input[type=number], .quote select { width: 100%; }
   .dlg-f { padding: 12px 18px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--border); }
   .err { color: var(--danger); font-size: 13px; min-height: 1em; }
+  dialog { max-height: 92dvh; }
+  .dlg-f { position: sticky; bottom: 0; background: #fff; }
+
+  /* ---------- touch (telefono e iPad) ---------- */
+  @media (pointer: coarse) {
+    input, select, .nomeq { font-size: 16px; }          /* evita lo zoom automatico di iOS */
+    button { min-height: 40px; }
+    button.small { min-height: 34px; padding: 6px 12px; font-size: 14px; }
+    input[type=checkbox] { width: 22px; height: 22px; }
+    .pren table { font-size: 15px; }
+    .pren td { padding: 6px 2px; }
+    .pren td.met { font-size: 12px; }
+    .nomeq { min-width: 110px; }
+  }
+
+  /* ---------- tablet ---------- */
+  @media (max-width: 1024px) {
+    header { padding: 14px 16px; }
+    .toolbar, main { padding-left: 16px; padding-right: 16px; }
+    .campi { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  }
+
+  @media (max-width: 1024px) and (orientation: landscape) {
+    .campi { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  }
+
+  /* ---------- telefono ---------- */
+  @media (max-width: 640px) {
+    #nomeCircolo { font-size: 22px; min-width: 0; }
+    .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+    .toolbar label:first-child { grid-column: 1 / -1; }
+    .toolbar input { width: 100% !important; }
+    #btnStampa { display: none; }
+    #btnNuova { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 10;
+                border-radius: 999px; padding: 14px 20px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+    .totali { grid-column: 1 / -1; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .totali > div { padding: 7px 8px; }
+    .totali .v { font-size: 15px; }
+    .totali .l { font-size: 9.5px; }
+    main { padding-top: 12px; padding-bottom: 90px; }
+
+    /* campi scorrevoli con il dito, uno alla volta */
+    #campiNav { display: flex; gap: 6px; overflow-x: auto; margin: 0 -16px 10px; padding: 0 16px; scrollbar-width: none; }
+    #campiNav button { flex: none; border-radius: 999px; padding: 6px 14px; min-height: 36px; white-space: nowrap; }
+    #campiNav button.attivo { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .campi { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
+             margin: 0 -16px; padding: 0 16px 4px; scroll-padding: 0 16px; scrollbar-width: none; }
+    .campi::-webkit-scrollbar, #campiNav::-webkit-scrollbar { display: none; }
+    .campo { flex: 0 0 calc(100% - 24px); scroll-snap-align: start; }
+
+    /* moduli entrate/uscite */
+    .movimento form label { flex: 1 1 calc(50% - 4px); }
+    .movimento form label:first-child { flex-basis: 100%; }
+    .movimento form input, .movimento form select { width: 100% !important; }
+    .movimento form button { flex-basis: 100%; }
+
+    /* tabelle come righe compatte */
+    .movimento thead { display: none; }
+    .movimento table, .movimento tbody, .movimento tfoot { display: block; }
+    .movimento tr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 10px 14px; border-bottom: 1px solid #eef1f4; }
+    .movimento td { padding: 0; border: none; }
+    .movimento td.imp { margin-left: auto; }
+    .movimento td[colspan] { flex: 1; }
+    .movimento tbody tr { display: grid; grid-template-columns: auto auto 1fr auto auto; gap: 2px 8px; }
+    .movimento tbody td { font-size: 12.5px; color: var(--muted); align-self: center; }
+    .movimento tbody td.imp { margin: 0; font-size: 15px; }
+    /* entrate / uscite: ora, descrizione, categoria, metodo, importo, elimina */
+    .t-mov td:nth-child(2) { grid-area: 1 / 1 / 2 / 4; font-size: 15px; font-weight: 600; color: var(--text); }
+    .t-mov td:nth-child(5) { grid-area: 1 / 4; }
+    .t-mov td:nth-child(6) { grid-area: 1 / 5 / 3 / 6; }
+    .t-mov td:nth-child(1) { grid-area: 2 / 1; }
+    .t-mov td:nth-child(3) { grid-area: 2 / 2; }
+    .t-mov td:nth-child(4) { grid-area: 2 / 3 / 3 / 5; }
+    /* quote in sospeso: data, campo, prenotazione, giocatore, importo, metodo, incassa */
+    .t-sosp td:nth-child(4) { grid-area: 1 / 1 / 2 / 4; font-size: 15px; font-weight: 600; color: var(--text); }
+    .t-sosp td:nth-child(5) { grid-area: 1 / 4 / 2 / 6; justify-self: end; }
+    .t-sosp td:nth-child(1) { grid-area: 2 / 1; }
+    .t-sosp td:nth-child(2) { grid-area: 2 / 2; }
+    .t-sosp td:nth-child(3) { grid-area: 2 / 3 / 3 / 6; }
+    .t-sosp td:nth-child(6) { grid-area: 3 / 1 / 4 / 4; margin-top: 6px; }
+    .t-sosp td:nth-child(6) select { width: 100%; }
+    .t-sosp td:nth-child(7) { grid-area: 3 / 4 / 4 / 6; margin-top: 6px; width: auto !important; }
+    /* POS: n., ora, origine, descrizione, importo */
+    .t-pos td:nth-child(4) { grid-area: 1 / 1 / 2 / 4; font-size: 14px; font-weight: 600; color: var(--text); }
+    .t-pos td:nth-child(5) { grid-area: 1 / 4 / 2 / 6; justify-self: end; }
+    .t-pos td:nth-child(1) { grid-area: 2 / 1; }
+    .t-pos td:nth-child(2) { grid-area: 2 / 2; }
+    .t-pos td:nth-child(3) { grid-area: 2 / 3 / 3 / 6; }
+    .t-pos td:nth-child(1)::before { content: '#'; }
+
+    /* finestra prenotazione a tutto schermo */
+    dialog { width: 100vw; max-width: 100vw; max-height: 100dvh; height: 100dvh; margin: 0; border-radius: 0; }
+    .movimento h2 { flex-wrap: wrap; gap: 4px 8px; font-size: 16px; }
+    #frm { display: flex; flex-direction: column; min-height: 100%; }
+    .dlg-b { padding: 14px 16px; flex: 1; }
+    .quote { grid-template-columns: 20px 1fr 1fr 40px; row-gap: 4px; }
+    .quote .hd { display: none; }
+    .quote > span { grid-column: 1; padding-top: 10px; }
+    .quote input[type=text] { grid-column: 2 / -1; margin-top: 10px; }
+    .quote input[type=number] { grid-column: 2; }
+    .quote select { grid-column: 3; }
+    .quote input[type=checkbox] { grid-column: 4; justify-self: center; }
+  }
 
   @media print {
     .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
@@ -138,6 +242,7 @@
 </div>
 
 <main>
+  <div id="campiNav"></div>
   <div class="campi" id="campi"></div>
 
   <div class="movimenti">
@@ -364,7 +469,7 @@ function renderMov(tipo) {
   const c = MOV[tipo];
   const lista = db[tipo].filter(u => u.data === dataSel).sort((a, b) => a.ora.localeCompare(b.ora));
   $('lista_' + tipo).innerHTML = lista.length
-    ? `<table><thead><tr><th>Ora</th><th>Descrizione</th><th>Categoria</th><th>Metodo</th><th class="imp">Importo</th><th></th></tr></thead><tbody>${
+    ? `<table class="t-mov"><thead><tr><th>Ora</th><th>Descrizione</th><th>Categoria</th><th>Metodo</th><th class="imp">Importo</th><th></th></tr></thead><tbody>${
         lista.map(u => `<tr><td>${u.ora}</td><td>${esc(u.descrizione)}</td><td>${u.categoria}</td><td>${u.metodo}</td>
           <td class="imp">${c.segno} ${eur(u.importo)}</td>
           <td style="width:40px"><button class="small danger" onclick="eliminaMov('${tipo}','${u.id}')">✕</button></td></tr>`).join('')
@@ -383,7 +488,7 @@ function render() {
   $('dataLabel').textContent = new Date(dataSel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const delGiorno = db.prenotazioni.filter(p => p.data === dataSel);
   let contanti = 0, pos = 0, app = 0, daInc = 0, gratuite = 0;
-  let html = '';
+  let html = '', nav = '';
   for (let c = 1; c <= db.numCampi; c++) {
     const lista = delGiorno.filter(p => p.campo === c).sort((a, b) => a.dalle.localeCompare(b.dalle));
     let totCampo = 0;
@@ -416,13 +521,16 @@ function render() {
         ${p.note ? `<div class="nota">${esc(p.note)}</div>` : ''}
       </div>`;
     }).join('');
-    html += `<section class="campo">
+    nav += `<button type="button" data-c="${c}" onclick="vaiACampo(${c})">Campo ${c} · ${lista.length}</button>`;
+    html += `<section class="campo" id="campo-${c}" data-c="${c}">
       <h2>Campo ${c} <span class="tot">${eur(totCampo)}</span></h2>
       <div class="lista">${items || '<div class="vuoto">Nessuna prenotazione</div>'}</div>
       <button class="add" onclick="apriDialog(${c})">+ Aggiungi al Campo ${c}</button>
     </section>`;
   }
   $('campi').innerHTML = html;
+  $('campiNav').innerHTML = nav;
+  evidenziaCampo();
   $('totDaInc').textContent = eur(daInc);
   const ent = renderMov('entrate'), usc = renderMov('uscite');
   contanti += ent.perMetodo('Contanti'); pos += ent.perMetodo('POS'); app += ent.perMetodo('App');
@@ -453,7 +561,7 @@ function renderSospesi() {
   $('totSospesi').textContent = eur(tot);
   $('totSospesiSez').textContent = eur(tot);
   $('listaSospesi').innerHTML = righe.length
-    ? `<table><thead><tr><th>Data</th><th>Campo</th><th>Prenotazione</th><th>Giocatore</th><th class="imp">Importo</th><th>Incassa con</th><th></th></tr></thead><tbody>${
+    ? `<table class="t-sosp"><thead><tr><th>Data</th><th>Campo</th><th>Prenotazione</th><th>Giocatore</th><th class="imp">Importo</th><th>Incassa con</th><th></th></tr></thead><tbody>${
         righe.map(({ p, q, i }) => `<tr>
           <td>${dataIt(p.data)}</td><td>Campo ${p.campo}</td><td>${esc(p.nome || '')} ${p.dalle}–${p.alle}</td>
           <td>${q.nome ? esc(q.nome) : `<span style="color:var(--muted)">Quota ${i + 1}</span>`}</td>
@@ -520,12 +628,33 @@ function renderPos() {
   const tot = righe.reduce((s, r) => s + r.importo, 0);
   $('totPosLista').textContent = eur(tot);
   $('listaPos').innerHTML = righe.length
-    ? `<table><thead><tr><th>#</th><th>Ora</th><th>Origine</th><th>Descrizione</th><th class="imp">Importo</th></tr></thead><tbody>${
+    ? `<table class="t-pos"><thead><tr><th>#</th><th>Ora</th><th>Origine</th><th>Descrizione</th><th class="imp">Importo</th></tr></thead><tbody>${
         righe.map((r, n) => `<tr><td>${n + 1}</td><td>${r.ora}</td><td>${esc(r.origine)}</td><td>${esc(r.descr)}</td>
           <td class="imp ${r.importo >= 0 ? 'entrata' : ''}">${r.importo >= 0 ? '+' : '−'} ${eur(Math.abs(r.importo))}</td></tr>`).join('')
       }</tbody><tfoot><tr><td colspan="4">Totale POS (${righe.length} movimenti)</td><td class="imp ${tot >= 0 ? 'entrata' : ''}">${eur(tot)}</td></tr></tfoot></table>`
     : '<div class="vuoto">Nessun movimento POS</div>';
 }
+// ---- telefono: navigazione tra i campi scorrevoli ----
+function vaiACampo(c) {
+  const box = $('campi'), el = $('campo-' + c);
+  box.scrollTo({ left: el.offsetLeft - box.offsetLeft - 16, behavior: 'smooth' });
+}
+function evidenziaCampo() {
+  const box = $('campi');
+  let attivo = 1, min = Infinity;
+  box.querySelectorAll('.campo').forEach(el => {
+    const d = Math.abs(el.getBoundingClientRect().left - box.getBoundingClientRect().left - 16);
+    if (d < min) { min = d; attivo = +el.dataset.c; }
+  });
+  document.querySelectorAll('#campiNav button').forEach(b => {
+    const on = +b.dataset.c === attivo;
+    b.classList.toggle('attivo', on);
+    if (on) { const nav = $('campiNav'); nav.scrollLeft = b.offsetLeft - nav.offsetLeft - (nav.clientWidth - b.offsetWidth) / 2; }
+  });
+}
+let tScroll;
+$('campi').addEventListener('scroll', () => { clearTimeout(tScroll); tScroll = setTimeout(evidenziaCampo, 80); }, { passive: true });
+
 function modifica(id) { const p = db.prenotazioni.find(x => x.id === id); apriDialog(p.campo, p); }
 
 render();
