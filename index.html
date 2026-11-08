@@ -18,6 +18,16 @@
                  display: inline-block; min-width: 200px; border-bottom: 1px dashed transparent; }
   #nomeCircolo:hover, #nomeCircolo:focus { border-bottom-color: rgba(255,255,255,.6); }
   header .sub { opacity: .85; font-size: 13px; margin-top: 4px; }
+  #menu { position: sticky; top: 0; z-index: 20; display: flex; justify-content: center; gap: 4px;
+          background: #17633e; padding: 0 16px; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+  #menu a { color: rgba(255,255,255,.8); text-decoration: none; font-weight: 600; font-size: 13px; letter-spacing: .06em;
+            text-transform: uppercase; padding: 12px 18px; border-bottom: 3px solid transparent; }
+  #menu a:hover { color: #fff; }
+  #menu a.attiva { color: #fff; border-bottom-color: #fff; }
+  .pagina[hidden] { display: none !important; }
+  .in-arrivo { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 40px 20px;
+               text-align: center; color: var(--muted); max-width: 600px; margin: 20px auto; }
+  .in-arrivo h2 { color: var(--text); margin: 0 0 8px; }
   .toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; padding: 16px 24px;
              background: var(--card); border-bottom: 1px solid var(--border); }
   .toolbar label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
@@ -127,6 +137,8 @@
   /* ---------- telefono ---------- */
   @media (max-width: 640px) {
     #nomeCircolo { font-size: 22px; min-width: 0; }
+    #menu { padding: 0; gap: 0; }
+    #menu a { flex: 1; text-align: center; padding: 12px 4px; font-size: 12px; letter-spacing: .03em; }
     .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
     .toolbar label:first-child { grid-column: 1 / -1; }
     .toolbar input { width: 100% !important; }
@@ -203,7 +215,7 @@
   }
 
   @media print {
-    .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
+    #menu, .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
     body { background: #fff; }
     .campi { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); }
   }
@@ -212,9 +224,16 @@
 <body>
 <header>
   <h1 id="nomeCircolo" contenteditable="true" spellcheck="false" title="Clicca per modificare il nome del circolo"></h1>
-  <div class="sub">Prima nota — <span id="dataLabel"></span></div>
+  <div class="sub" id="sottotitolo">Prima nota — <span id="dataLabel"></span></div>
 </header>
 
+<nav id="menu">
+  <a href="#prima-nota" data-pagina="prima-nota">Prima nota</a>
+  <a href="#utenti" data-pagina="utenti">Utenti</a>
+  <a href="#annotazioni" data-pagina="annotazioni">Annotazioni</a>
+</nav>
+
+<div class="pagina" id="pg-prima-nota">
 <div class="toolbar">
   <label>Data
     <input type="date" id="data">
@@ -260,6 +279,25 @@
     <div id="listaPos"></div>
   </section>
 </main>
+</div>
+
+<div class="pagina" id="pg-utenti" hidden>
+  <main>
+    <section class="in-arrivo">
+      <h2>Utenti</h2>
+      <p>Questa sezione è in preparazione.</p>
+    </section>
+  </main>
+</div>
+
+<div class="pagina" id="pg-annotazioni" hidden>
+  <main>
+    <section class="in-arrivo">
+      <h2>Annotazioni</h2>
+      <p>Questa sezione è in preparazione.</p>
+    </section>
+  </main>
+</div>
 
 <dialog id="dlg">
   <form method="dialog" id="frm">
@@ -485,7 +523,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 // ---- render ----
 function render() {
-  $('dataLabel').textContent = new Date(dataSel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  if ($('dataLabel')) $('dataLabel').textContent = new Date(dataSel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const delGiorno = db.prenotazioni.filter(p => p.data === dataSel);
   let contanti = 0, pos = 0, app = 0, daInc = 0, gratuite = 0;
   let html = '', nav = '';
@@ -655,9 +693,22 @@ function evidenziaCampo() {
 let tScroll;
 $('campi').addEventListener('scroll', () => { clearTimeout(tScroll); tScroll = setTimeout(evidenziaCampo, 80); }, { passive: true });
 
+// ---- menu pagine ----
+const PAGINE = { 'prima-nota': 'Prima nota', 'utenti': 'Utenti', 'annotazioni': 'Annotazioni' };
+function mostraPagina() {
+  const pag = PAGINE[location.hash.slice(1)] ? location.hash.slice(1) : 'prima-nota';
+  for (const p in PAGINE) $('pg-' + p).hidden = p !== pag;
+  document.querySelectorAll('#menu a').forEach(a => a.classList.toggle('attiva', a.dataset.pagina === pag));
+  if (pag === 'prima-nota') { $('sottotitolo').innerHTML = 'Prima nota — <span id="dataLabel"></span>'; render(); }
+  else $('sottotitolo').textContent = PAGINE[pag];
+  document.title = PAGINE[pag] + ' · ' + db.nomeCircolo;
+  scrollTo(0, 0);
+}
+window.addEventListener('hashchange', mostraPagina);
+
 function modifica(id) { const p = db.prenotazioni.find(x => x.id === id); apriDialog(p.campo, p); }
 
-render();
+mostraPagina();
 </script>
 </body>
 </html>
