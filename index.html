@@ -69,7 +69,9 @@
   .campo .lista { padding: 10px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
   .vuoto { color: var(--muted); font-style: italic; text-align: center; padding: 20px 0; }
   .pren { border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
-  .pren.incompleta { border-color: #f0c36d; background: var(--warn-soft); }
+  .pren { border-width: 2px; }
+  .pren.completa { border-color: #27ae60; }
+  .pren.incompleta { border-color: var(--danger); background: #fdf2f1; }
   .pren .ora { font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
   .pren .azioni { display: flex; gap: 4px; }
   .pren table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
@@ -141,6 +143,11 @@
   .t-utenti td.nome { font-weight: 600; }
   .t-utenti a { color: inherit; }
   .t-utenti td.az { white-space: nowrap; text-align: right; }
+  .badge.mista { background: var(--accent-soft); color: var(--accent); }
+  .t-utenti td.c-sesso { font-weight: 600; text-align: center; }
+  .chip-riga { align-self: flex-start; }
+  .chip-riga span { padding: 8px 14px; }
+  .chip-riga input:checked + span::before { content: '✓ '; }
   .badge.sosp { background: #f3eaf8; color: #8e44ad; }
   .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; background: #e8effa; color: #2c6fbb; font-size: 12px; font-weight: 600; }
   .disp { font-size: 12px; color: var(--muted); }
@@ -348,15 +355,20 @@
     .griglia-disp .cella span { height: 38px; }
     .t-utenti tbody tr { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 10px 14px; border-bottom: 1px solid #eef1f4; }
     .t-utenti tbody td { padding: 0; border: none; }
-    .t-utenti tbody td:nth-child(1) { order: 1; font-size: 16px; }
-    .t-utenti tbody td:nth-child(2) { order: 2; font-size: 16px; }
-    .t-utenti tbody td:nth-child(7) { order: 3; margin-left: auto; }
-    .t-utenti tbody td:nth-child(8) { order: 4; }
-    .t-utenti tbody td:nth-child(3) { order: 5; flex-basis: 100%; }
-    .t-utenti tbody td:nth-child(4) { order: 6; flex-basis: 100%; color: var(--muted); }
-    .t-utenti tbody td:nth-child(5) { order: 7; font-weight: 600; }
-    .t-utenti tbody td:nth-child(6) { order: 8; }
-    .t-utenti tbody td:nth-child(9) { order: 9; margin-left: auto; }
+    .t-utenti tbody td.c-cognome { order: 1; font-size: 16px; }
+    .t-utenti tbody td.c-nome { order: 2; font-size: 16px; }
+    .t-utenti tbody td.c-sesso { order: 3; color: var(--muted); font-weight: 400; }
+    .t-utenti tbody td.c-sesso::before { content: '('; }
+    .t-utenti tbody td.c-sesso::after { content: ')'; }
+    .t-utenti tbody td.c-livello { order: 4; margin-left: auto; }
+    .t-utenti tbody td.c-sospesi { order: 5; }
+    .t-utenti tbody td.c-tel { order: 6; flex-basis: 100%; }
+    .t-utenti tbody td.c-email { order: 7; flex-basis: 100%; color: var(--muted); }
+    .t-utenti tbody td.c-ruolo { order: 8; font-weight: 600; }
+    .t-utenti tbody td.c-mista { order: 9; }
+    .t-utenti tbody td.c-mista .badge::before { content: 'Mista '; }
+    .t-utenti tbody td.c-disp { order: 10; }
+    .t-utenti tbody td.az { order: 11; margin-left: auto; }
     .t-utenti tbody td:empty { display: none; }
     .t-utenti tbody td.vuoto { flex-basis: 100%; }
     ol.livelli li { gap: 5px; }
@@ -571,9 +583,11 @@
         <label>Email <input type="email" id="utEmail" autocomplete="off"></label>
       </div>
       <div class="row">
+        <label>Sesso <select id="utSesso"><option value="">—</option><option>M</option><option>F</option></select></label>
         <label>Ruolo <select id="utRuolo"></select></label>
         <label>Livello <select id="utLivello"></select></label>
       </div>
+      <label class="chip chip-riga"><input type="checkbox" id="utMista"><span>Disponibile per partita mista</span></label>
       <div class="campo-gruppo">
         <div class="etichetta">Disponibilità <span class="aiuto-mini">— tocca un giorno o una fascia per selezionare tutta la riga o la colonna</span></div>
         <table class="griglia-disp" id="utDisp"></table>
@@ -817,7 +831,7 @@ function render() {
       const righe = p.quote.map((q, i) => {
         const gratuita = GRATUITI.includes(q.metodo), sospeso = q.metodo === 'Sospeso';
         if (gratuita) gratuite++;
-        else if (sospeso) { if (!q.saldo) incompleta = true; }
+        else if (sospeso) { /* il sospeso è una scelta fatta: la quota è registrata */ }
         else if (q.pagato) {
           totP += q.importo;
           if (q.metodo === 'POS') pos += q.importo; else if (q.metodo === 'App') app += q.importo; else contanti += q.importo;
@@ -832,7 +846,7 @@ function render() {
         </tr>`;
       }).join('');
       totCampo += totP;
-      return `<div class="pren ${incompleta ? 'incompleta' : ''}">
+      return `<div class="pren ${incompleta ? 'incompleta' : 'completa'}" title="${incompleta ? 'Ci sono quote non ancora segnate come pagate' : 'Tutte le quote sono registrate'}">
         <div class="ora"><span>${p.dalle} – ${p.alle}</span>
           <span class="azioni"><button class="small" onclick="modifica('${p.id}')">Modifica</button><button class="small danger" onclick="elimina('${p.id}')">✕</button></span></div>
         <div class="nomep">${p.nome ? esc(p.nome) : '<span style="color:var(--muted)">Senza nome</span>'}</div>
@@ -1126,10 +1140,12 @@ const testoDisp = u => {
 const COL_UTENTI = [
   { k: 'cognome',  t: 'Cognome',       f: 'testo',  v: u => u.cognome },
   { k: 'nome',     t: 'Nome',          f: 'testo',  v: u => u.nome },
+  { k: 'sesso',    t: 'Sesso',         f: 'scelta', v: u => u.sesso || '', opz: () => ['M', 'F'] },
   { k: 'telefono', t: 'Telefono',      f: 'testo',  v: u => u.telefono },
   { k: 'email',    t: 'Email',         f: 'testo',  v: u => u.email },
   { k: 'ruolo',    t: 'Ruolo',         f: 'scelta', v: u => u.ruolo, opz: () => RUOLI },
   { k: 'disp',     t: 'Disponibilità', f: 'disp',   v: testoDisp },
+  { k: 'mista',    t: 'Mista',         f: 'scelta', v: u => u.mista ? 'Sì' : 'No', opz: () => ['Sì', 'No'] },
   { k: 'livello',  t: 'Livello',       f: 'scelta', v: u => nomeLivello(u.livelloId), opz: () => db.livelli.map(l => l.nome),
     ord: u => { const i = db.livelli.findIndex(l => l.id === u.livelloId); return i < 0 ? 9999 : i; } },
   { k: 'sospesi',  t: 'Sospesi',       f: 'sospesi', v: u => sospesiDi(u).tot, ord: u => sospesiDi(u).tot },
@@ -1209,17 +1225,19 @@ function renderCorpoUtenti() {
   const tot = db.utenti.length;
   $('contaUtenti').textContent = elenco.length === tot ? `(${tot})` : `(${elenco.length} di ${tot})`;
   $('corpoUtenti').innerHTML = elenco.length ? elenco.map(u => `<tr>
-      <td class="nome">${esc(u.cognome || '')}</td>
-      <td class="nome">${esc(u.nome || '')}</td>
-      <td>${u.telefono ? `<a href="tel:${esc(u.telefono.replace(/\s/g, ''))}">${esc(u.telefono)}</a>` : ''}</td>
-      <td>${u.email ? `<a href="mailto:${esc(u.email)}">${esc(u.email)}</a>` : ''}</td>
-      <td>${esc(u.ruolo || '')}</td>
-      <td class="disp">${esc(testoDisp(u))}</td>
-      <td>${u.livelloId && nomeLivello(u.livelloId) ? `<span class="badge">${esc(nomeLivello(u.livelloId))}</span>` : ''}</td>
-      <td>${sospesiDi(u).n ? `<span class="badge sosp" title="${sospesiDi(u).n} ${sospesiDi(u).n === 1 ? 'sospeso' : 'sospesi'}">${eur(sospesiDi(u).tot)}</span>` : ''}</td>
+      <td class="nome c-cognome">${esc(u.cognome || '')}</td>
+      <td class="nome c-nome">${esc(u.nome || '')}</td>
+      <td class="c-sesso">${esc(u.sesso || '')}</td>
+      <td class="c-tel">${u.telefono ? `<a href="tel:${esc(u.telefono.replace(/\s/g, ''))}">${esc(u.telefono)}</a>` : ''}</td>
+      <td class="c-email">${u.email ? `<a href="mailto:${esc(u.email)}">${esc(u.email)}</a>` : ''}</td>
+      <td class="c-ruolo">${esc(u.ruolo || '')}</td>
+      <td class="disp c-disp">${esc(testoDisp(u))}</td>
+      <td class="c-mista">${u.mista ? '<span class="badge mista">Sì</span>' : ''}</td>
+      <td class="c-livello">${u.livelloId && nomeLivello(u.livelloId) ? `<span class="badge">${esc(nomeLivello(u.livelloId))}</span>` : ''}</td>
+      <td class="c-sospesi">${sospesiDi(u).n ? `<span class="badge sosp" title="${sospesiDi(u).n} ${sospesiDi(u).n === 1 ? 'sospeso' : 'sospesi'}">${eur(sospesiDi(u).tot)}</span>` : ''}</td>
       <td class="az"><button type="button" class="small" onclick="apriUtente('${u.id}')">Modifica</button></td>
     </tr>`).join('')
-    : `<tr><td colspan="9" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
+    : `<tr><td colspan="11" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
 }
 
 function ordinaUtenti(k) {
@@ -1257,6 +1275,8 @@ function apriUtente(id) {
   $('utTel').value = u ? (u.telefono || '') : '';
   $('utEmail').value = u ? (u.email || '') : '';
   $('utRuolo').value = u ? (u.ruolo || '') : '';
+  $('utSesso').value = u ? (u.sesso || '') : '';
+  $('utMista').checked = !!(u && u.mista);
   $('utLivello').value = u ? (u.livelloId || '') : '';
   $('utDisp').querySelectorAll('input').forEach(c => c.checked = !!u && fasceDi(u, c.dataset.g).includes(c.dataset.f));
   $('btnEliminaUtente').hidden = !u;
@@ -1285,6 +1305,7 @@ $('frmUtente').addEventListener('submit', e => {
     id: utenteId || nuovoId(), nome, cognome,
     telefono: $('utTel').value.trim(), email,
     ruolo: $('utRuolo').value, livelloId: $('utLivello').value,
+    sesso: $('utSesso').value, mista: $('utMista').checked,
     disp: Object.fromEntries(GIORNI.map(g => [g, [...$('utDisp').querySelectorAll(`input[data-g="${g}"]:checked`)].map(c => c.dataset.f)])
                                    .filter(([, f]) => f.length)),
   };
