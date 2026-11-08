@@ -102,7 +102,8 @@
   .dlg-h { padding: 14px 18px; background: var(--accent); color: #fff; font-weight: 700; font-size: 16px; }
   .dlg-b { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
   .row { display: flex; gap: 10px; }
-  .row label { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .row label { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .row input, .row select { width: 100%; min-width: 0; }
   .quote { display: grid; grid-template-columns: 24px 1fr 90px 90px 50px; gap: 6px; align-items: center; }
   .quote .hd { font-size: 11px; color: var(--muted); }
   .quote input[type=text], .quote input[type=number], .quote select { width: 100%; }
@@ -110,6 +111,47 @@
   .err { color: var(--danger); font-size: 13px; min-height: 1em; }
   dialog { max-height: 92dvh; }
   .dlg-f { position: sticky; bottom: 0; background: #fff; }
+
+  /* ---------- pagine elenco (utenti, livelli) ---------- */
+  .elenco { background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+  .elenco.stretto { max-width: 640px; margin: 0 auto; }
+  .elenco-h { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+              padding: 12px 14px; background: var(--accent-soft); border-radius: 10px 10px 0 0; }
+  .elenco-h h2 { margin: 0; font-size: 17px; }
+  .elenco-h .conta { font-size: 13px; font-weight: 500; color: var(--muted); margin-left: 6px; }
+  .azioni-h { display: flex; gap: 8px; }
+  .tab-wrap { overflow-x: auto; }
+  .t-utenti { width: 100%; border-collapse: collapse; }
+  .t-utenti th, .t-utenti td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #eef1f4; vertical-align: middle; }
+  .t-utenti .titoli th { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 600; cursor: pointer;
+                         user-select: none; white-space: nowrap; }
+  .t-utenti .titoli th:hover { color: var(--text); }
+  .t-utenti .titoli th.ord { color: var(--accent); }
+  .t-utenti .titoli th.no-ord { cursor: default; }
+  .t-utenti .filtri th { padding-top: 0; font-weight: 400; }
+  .t-utenti .filtri input, .t-utenti .filtri select { width: 100%; min-width: 80px; padding: 5px 7px; font-size: 13px; }
+  .t-utenti .filtri .attivo { border-color: var(--accent); background: var(--accent-soft); }
+  .t-utenti tbody tr:hover { background: #fafbfc; }
+  .t-utenti td.nome { font-weight: 600; }
+  .t-utenti a { color: inherit; }
+  .t-utenti td.az { white-space: nowrap; text-align: right; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; background: #e8effa; color: #2c6fbb; font-size: 12px; font-weight: 600; }
+  .disp { font-size: 12px; color: var(--muted); }
+  .aiuto { color: var(--muted); padding: 12px 14px 0; margin: 0; }
+  .riga-add { display: flex; gap: 8px; padding: 12px 14px; }
+  .riga-add input { flex: 1; }
+  ol.livelli { list-style: none; margin: 0; padding: 0 14px 14px; counter-reset: liv; }
+  ol.livelli li { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid #eef1f4; counter-increment: liv; }
+  ol.livelli li::before { content: counter(liv); width: 22px; color: var(--muted); font-weight: 600; text-align: center; }
+  ol.livelli input { flex: 1; min-width: 0; }
+  ol.livelli button { flex: none; }
+  ol.livelli .n { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .campo-gruppo .etichetta { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span { display: inline-block; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; cursor: pointer; user-select: none; }
+  .chip input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip input:focus-visible + span { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 4px var(--accent); }
 
   /* ---------- touch (telefono e iPad) ---------- */
   @media (pointer: coarse) {
@@ -138,7 +180,8 @@
   @media (max-width: 640px) {
     #nomeCircolo { font-size: 22px; min-width: 0; }
     #menu { padding: 0; gap: 0; }
-    #menu a { flex: 1; text-align: center; padding: 12px 4px; font-size: 12px; letter-spacing: .03em; }
+    #menu { overflow-x: auto; scrollbar-width: none; }
+    #menu a { flex: 1 0 auto; text-align: center; padding: 12px 8px; font-size: 11px; letter-spacing: .02em; }
     .toolbar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
     .toolbar label:first-child { grid-column: 1 / -1; }
     .toolbar input { width: 100% !important; }
@@ -214,6 +257,36 @@
     .quote input[type=checkbox] { grid-column: 4; justify-self: center; }
   }
 
+  @media (max-width: 640px) {
+    #frmUtente { display: flex; flex-direction: column; min-height: 100%; }
+    #frmUtente .dlg-b { flex: 1; }
+    .elenco-h .azioni-h { width: 100%; }
+    .elenco-h .azioni-h button { flex: 1; }
+    .tab-wrap { overflow: visible; }
+    .t-utenti, .t-utenti thead, .t-utenti tbody { display: block; }
+    .t-utenti .titoli { display: none; }
+    .t-utenti .filtri { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .t-utenti .filtri th { padding: 0; border: none; }
+    .t-utenti .filtri th:empty { display: none; }
+    .t-utenti tbody tr { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 10px 14px; border-bottom: 1px solid #eef1f4; }
+    .t-utenti tbody td { padding: 0; border: none; }
+    .t-utenti tbody td:nth-child(1) { order: 1; font-size: 16px; }
+    .t-utenti tbody td:nth-child(2) { order: 2; font-size: 16px; }
+    .t-utenti tbody td:nth-child(7) { order: 3; margin-left: auto; }
+    .t-utenti tbody td:nth-child(3) { order: 4; flex-basis: 100%; }
+    .t-utenti tbody td:nth-child(4) { order: 5; flex-basis: 100%; color: var(--muted); }
+    .t-utenti tbody td:nth-child(5) { order: 6; font-weight: 600; }
+    .t-utenti tbody td:nth-child(6) { order: 7; }
+    .t-utenti tbody td:nth-child(8) { order: 8; margin-left: auto; }
+    .t-utenti tbody td:empty { display: none; }
+    .t-utenti tbody td.vuoto { flex-basis: 100%; }
+    ol.livelli li { gap: 5px; }
+    ol.livelli li::before { width: 16px; }
+    ol.livelli button.small { padding: 6px 9px; }
+    .riga-add { flex-wrap: wrap; }
+    .riga-add input, .riga-add button { flex-basis: 100%; }
+  }
+
   @media print {
     #menu, .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
     body { background: #fff; }
@@ -231,6 +304,7 @@
   <a href="#prima-nota" data-pagina="prima-nota">Prima nota</a>
   <a href="#utenti" data-pagina="utenti">Utenti</a>
   <a href="#annotazioni" data-pagina="annotazioni">Annotazioni</a>
+  <a href="#livelli" data-pagina="livelli">Livelli</a>
 </nav>
 
 <div class="pagina" id="pg-prima-nota">
@@ -283,9 +357,34 @@
 
 <div class="pagina" id="pg-utenti" hidden>
   <main>
-    <section class="in-arrivo">
-      <h2>Utenti</h2>
-      <p>Questa sezione è in preparazione.</p>
+    <section class="elenco">
+      <div class="elenco-h">
+        <h2>Utenti <span class="conta" id="contaUtenti"></span></h2>
+        <div class="azioni-h">
+          <button type="button" id="btnAzzeraFiltri">Azzera filtri</button>
+          <button type="button" class="primary" id="btnNuovoUtente">+ Nuovo utente</button>
+        </div>
+      </div>
+      <div class="tab-wrap">
+        <table class="t-utenti">
+          <thead><tr class="titoli" id="titoliUtenti"></tr><tr class="filtri" id="filtriUtenti"></tr></thead>
+          <tbody id="corpoUtenti"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="pagina" id="pg-livelli" hidden>
+  <main>
+    <section class="elenco stretto">
+      <div class="elenco-h"><h2>Livelli di gioco</h2></div>
+      <p class="aiuto">Imposta i livelli usati dal circolo, dal più basso al più alto. Puoi rinominarli scrivendo direttamente nel nome, riordinarli con le frecce o eliminarli.</p>
+      <form id="frmLivello" class="riga-add">
+        <input type="text" id="nuovoLivello" placeholder="Es. Principiante, 3.0, Gold…" required>
+        <button type="submit" class="primary">+ Aggiungi livello</button>
+      </form>
+      <ol id="listaLivelli" class="livelli"></ol>
     </section>
   </main>
 </div>
@@ -326,6 +425,38 @@
   </form>
 </dialog>
 
+<dialog id="dlgUtente">
+  <form method="dialog" id="frmUtente">
+    <div class="dlg-h" id="dlgUtenteTitolo">Nuovo utente</div>
+    <div class="dlg-b">
+      <div class="row">
+        <label>Nome <input type="text" id="utNome" required autocomplete="off"></label>
+        <label>Cognome <input type="text" id="utCognome" required autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <label>Telefono <input type="tel" id="utTel" autocomplete="off"></label>
+        <label>Email <input type="email" id="utEmail" autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <label>Ruolo <select id="utRuolo"></select></label>
+        <label>Livello <select id="utLivello"></select></label>
+      </div>
+      <div class="campo-gruppo">
+        <div class="etichetta">Disponibilità — giorni</div>
+        <div class="chips" id="utGiorni"></div>
+        <div class="etichetta" style="margin-top:8px">Disponibilità — fasce orarie</div>
+        <div class="chips" id="utFasce"></div>
+      </div>
+      <div class="err" id="errUtente"></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" class="danger" id="btnEliminaUtente" style="margin-right:auto">Elimina</button>
+      <button type="button" id="btnAnnullaUtente">Annulla</button>
+      <button type="submit" class="primary">Salva</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 const KEY = 'padel-prima-nota-v1';
 const METODI = ['Contanti', 'POS', 'App', 'Omaggio', 'Staff', 'Sospeso'];
@@ -338,6 +469,8 @@ try { db = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
 if (!db) db = { nomeCircolo: 'Circolo Padel', numCampi: 3, quotaDef: 10, prenotazioni: [] };
 if (!db.uscite) db.uscite = [];
 if (!db.entrate) db.entrate = [];
+if (!db.utenti) db.utenti = [];
+if (!db.livelli) db.livelli = [];
 const salvaDb = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { alert('Impossibile salvare i dati'); } };
 
 const $ = id => document.getElementById(id);
@@ -693,14 +826,200 @@ function evidenziaCampo() {
 let tScroll;
 $('campi').addEventListener('scroll', () => { clearTimeout(tScroll); tScroll = setTimeout(evidenziaCampo, 80); }, { passive: true });
 
+// ================= LIVELLI =================
+const nuovoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function renderLivelli() {
+  const lista = $('listaLivelli');
+  if (!db.livelli.length) { lista.innerHTML = '<div class="vuoto">Nessun livello impostato</div>'; return; }
+  lista.innerHTML = db.livelli.map((l, i) => {
+    const n = db.utenti.filter(u => u.livelloId === l.id).length;
+    return `<li>
+      <input type="text" value="${esc(l.nome)}" onchange="rinominaLivello('${l.id}', this.value)">
+      <span class="n">${n} ${n === 1 ? 'utente' : 'utenti'}</span>
+      <button type="button" class="small" title="Sposta su" ${i === 0 ? 'disabled' : ''} onclick="spostaLivello(${i}, -1)">↑</button>
+      <button type="button" class="small" title="Sposta giù" ${i === db.livelli.length - 1 ? 'disabled' : ''} onclick="spostaLivello(${i}, 1)">↓</button>
+      <button type="button" class="small danger" title="Elimina" onclick="eliminaLivello('${l.id}')">✕</button>
+    </li>`;
+  }).join('');
+}
+$('frmLivello').addEventListener('submit', e => {
+  e.preventDefault();
+  const nome = $('nuovoLivello').value.trim();
+  if (!nome) return;
+  if (db.livelli.some(l => l.nome.toLowerCase() === nome.toLowerCase())) return alert('Questo livello esiste già.');
+  db.livelli.push({ id: nuovoId(), nome });
+  salvaDb(); $('nuovoLivello').value = ''; $('nuovoLivello').focus(); renderLivelli();
+});
+function rinominaLivello(id, nome) {
+  nome = nome.trim();
+  const l = db.livelli.find(x => x.id === id);
+  if (nome) { l.nome = nome; salvaDb(); }
+  renderLivelli();
+}
+function spostaLivello(i, d) {
+  const j = i + d;
+  [db.livelli[i], db.livelli[j]] = [db.livelli[j], db.livelli[i]];
+  salvaDb(); renderLivelli();
+}
+function eliminaLivello(id) {
+  const l = db.livelli.find(x => x.id === id);
+  const n = db.utenti.filter(u => u.livelloId === id).length;
+  if (!confirm(`Eliminare il livello "${l.nome}"?` + (n ? `\n${n} utenti resteranno senza livello.` : ''))) return;
+  db.utenti.forEach(u => { if (u.livelloId === id) u.livelloId = ''; });
+  db.livelli = db.livelli.filter(x => x.id !== id);
+  salvaDb(); renderLivelli();
+}
+
+// ================= UTENTI =================
+const RUOLI = ['DX', 'SX', 'DX e SX'];
+const GIORNI = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+const FASCE = ['Mattina', 'Pomeriggio', 'Sera'];
+const nomeLivello = id => (db.livelli.find(l => l.id === id) || {}).nome || '';
+const testoDisp = u => {
+  const g = (u.giorni || []), f = (u.fasce || []);
+  return [g.length === 7 ? 'Tutti i giorni' : g.join(' '), f.join(', ')].filter(Boolean).join(' · ');
+};
+const COL_UTENTI = [
+  { k: 'cognome',  t: 'Cognome',       f: 'testo',  v: u => u.cognome },
+  { k: 'nome',     t: 'Nome',          f: 'testo',  v: u => u.nome },
+  { k: 'telefono', t: 'Telefono',      f: 'testo',  v: u => u.telefono },
+  { k: 'email',    t: 'Email',         f: 'testo',  v: u => u.email },
+  { k: 'ruolo',    t: 'Ruolo',         f: 'scelta', v: u => u.ruolo, opz: () => RUOLI },
+  { k: 'disp',     t: 'Disponibilità', f: 'scelta', v: testoDisp, opz: () => [...GIORNI, ...FASCE] },
+  { k: 'livello',  t: 'Livello',       f: 'scelta', v: u => nomeLivello(u.livelloId), opz: () => db.livelli.map(l => l.nome),
+    ord: u => { const i = db.livelli.findIndex(l => l.id === u.livelloId); return i < 0 ? 9999 : i; } },
+];
+let filtriUtenti = {}, ordUtenti = { k: 'cognome', dir: 1 };
+
+function renderUtenti() {
+  // intestazioni cliccabili per ordinare
+  $('titoliUtenti').innerHTML = COL_UTENTI.map(c =>
+    `<th class="${ordUtenti.k === c.k ? 'ord' : ''}" onclick="ordinaUtenti('${c.k}')">${c.t}${ordUtenti.k === c.k ? (ordUtenti.dir > 0 ? ' ▲' : ' ▼') : ''}</th>`
+  ).join('') + '<th class="no-ord"></th>';
+  // riga dei filtri, uno per colonna
+  $('filtriUtenti').innerHTML = COL_UTENTI.map(c => {
+    const val = filtriUtenti[c.k] || '';
+    if (c.f === 'testo')
+      return `<th><input type="search" data-k="${c.k}" placeholder="${c.t}…" value="${esc(val)}" class="${val ? 'attivo' : ''}"></th>`;
+    return `<th><select data-k="${c.k}" class="${val ? 'attivo' : ''}"><option value="">${c.t}: tutti</option>${
+      c.opz().map(o => `<option ${o === val ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></th>`;
+  }).join('') + '<th></th>';
+  $('filtriUtenti').querySelectorAll('input, select').forEach(el => {
+    el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => {
+      filtriUtenti[el.dataset.k] = el.value.trim();
+      el.classList.toggle('attivo', !!el.value);
+      renderCorpoUtenti();
+    });
+  });
+  renderCorpoUtenti();
+}
+
+function passaFiltri(u) {
+  return COL_UTENTI.every(c => {
+    const f = filtriUtenti[c.k];
+    if (!f) return true;
+    if (c.k === 'ruolo') return u.ruolo === f || (f !== 'DX e SX' && u.ruolo === 'DX e SX');   // chi gioca da entrambi i lati compare sia in DX sia in SX
+    if (c.k === 'disp') return (u.giorni || []).includes(f) || (u.fasce || []).includes(f);
+    if (c.f === 'scelta') return c.v(u) === f;
+    return (c.v(u) || '').toLowerCase().includes(f.toLowerCase());
+  });
+}
+
+function renderCorpoUtenti() {
+  const col = COL_UTENTI.find(c => c.k === ordUtenti.k);
+  const chiave = col.ord || (u => (col.v(u) || '').toLowerCase());
+  const elenco = db.utenti.filter(passaFiltri).sort((a, b) => {
+    const x = chiave(a), y = chiave(b);
+    const r = typeof x === 'number' ? x - y : x.localeCompare(y, 'it');
+    return r * ordUtenti.dir
+      || (a.cognome || '').localeCompare(b.cognome || '', 'it')
+      || (a.nome || '').localeCompare(b.nome || '', 'it');
+  });
+  const tot = db.utenti.length;
+  $('contaUtenti').textContent = elenco.length === tot ? `(${tot})` : `(${elenco.length} di ${tot})`;
+  $('corpoUtenti').innerHTML = elenco.length ? elenco.map(u => `<tr>
+      <td class="nome">${esc(u.cognome || '')}</td>
+      <td class="nome">${esc(u.nome || '')}</td>
+      <td>${u.telefono ? `<a href="tel:${esc(u.telefono.replace(/\s/g, ''))}">${esc(u.telefono)}</a>` : ''}</td>
+      <td>${u.email ? `<a href="mailto:${esc(u.email)}">${esc(u.email)}</a>` : ''}</td>
+      <td>${esc(u.ruolo || '')}</td>
+      <td class="disp">${esc(testoDisp(u))}</td>
+      <td>${u.livelloId && nomeLivello(u.livelloId) ? `<span class="badge">${esc(nomeLivello(u.livelloId))}</span>` : ''}</td>
+      <td class="az"><button type="button" class="small" onclick="apriUtente('${u.id}')">Modifica</button></td>
+    </tr>`).join('')
+    : `<tr><td colspan="8" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
+}
+
+function ordinaUtenti(k) {
+  ordUtenti = ordUtenti.k === k ? { k, dir: -ordUtenti.dir } : { k, dir: 1 };
+  renderUtenti();
+}
+$('btnAzzeraFiltri').addEventListener('click', () => { filtriUtenti = {}; renderUtenti(); });
+
+// ---- scheda utente ----
+let utenteId = null;
+$('utRuolo').innerHTML = '<option value="">—</option>' + RUOLI.map(r => `<option>${r}</option>`).join('');
+$('utGiorni').innerHTML = GIORNI.map(g => `<label class="chip"><input type="checkbox" value="${g}"><span>${g}</span></label>`).join('');
+$('utFasce').innerHTML = FASCE.map(f => `<label class="chip"><input type="checkbox" value="${f}"><span>${f}</span></label>`).join('');
+
+function apriUtente(id) {
+  const u = id ? db.utenti.find(x => x.id === id) : null;
+  utenteId = u ? u.id : null;
+  $('dlgUtenteTitolo').textContent = u ? 'Modifica utente' : 'Nuovo utente';
+  $('utLivello').innerHTML = db.livelli.length
+    ? '<option value="">—</option>' + db.livelli.map(l => `<option value="${l.id}">${esc(l.nome)}</option>`).join('')
+    : '<option value="">Nessun livello: impostali nella pagina Livelli</option>';
+  $('utNome').value = u ? u.nome : '';
+  $('utCognome').value = u ? u.cognome : '';
+  $('utTel').value = u ? (u.telefono || '') : '';
+  $('utEmail').value = u ? (u.email || '') : '';
+  $('utRuolo').value = u ? (u.ruolo || '') : '';
+  $('utLivello').value = u ? (u.livelloId || '') : '';
+  $('utGiorni').querySelectorAll('input').forEach(c => c.checked = !!u && (u.giorni || []).includes(c.value));
+  $('utFasce').querySelectorAll('input').forEach(c => c.checked = !!u && (u.fasce || []).includes(c.value));
+  $('btnEliminaUtente').hidden = !u;
+  $('errUtente').textContent = '';
+  $('dlgUtente').showModal();
+  $('utNome').focus();
+}
+$('btnNuovoUtente').addEventListener('click', () => apriUtente());
+$('btnAnnullaUtente').addEventListener('click', () => $('dlgUtente').close());
+$('btnEliminaUtente').addEventListener('click', () => {
+  const u = db.utenti.find(x => x.id === utenteId);
+  if (!confirm(`Eliminare l'utente ${u.nome} ${u.cognome}?`)) return;
+  db.utenti = db.utenti.filter(x => x.id !== utenteId);
+  salvaDb(); $('dlgUtente').close(); renderUtenti();
+});
+$('frmUtente').addEventListener('submit', e => {
+  e.preventDefault();
+  const nome = $('utNome').value.trim(), cognome = $('utCognome').value.trim();
+  if (!nome || !cognome) return $('errUtente').textContent = 'Nome e cognome sono obbligatori.';
+  const email = $('utEmail').value.trim();
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return $('errUtente').textContent = 'Email non valida.';
+  const doppio = db.utenti.find(x => x.id !== utenteId && x.nome.toLowerCase() === nome.toLowerCase() && x.cognome.toLowerCase() === cognome.toLowerCase());
+  if (doppio && !confirm(`Esiste già un utente ${doppio.nome} ${doppio.cognome}. Salvare comunque?`)) return;
+  const rec = {
+    id: utenteId || nuovoId(), nome, cognome,
+    telefono: $('utTel').value.trim(), email,
+    ruolo: $('utRuolo').value, livelloId: $('utLivello').value,
+    giorni: [...$('utGiorni').querySelectorAll('input:checked')].map(c => c.value),
+    fasce: [...$('utFasce').querySelectorAll('input:checked')].map(c => c.value),
+  };
+  if (utenteId) db.utenti = db.utenti.map(x => x.id === utenteId ? rec : x);
+  else db.utenti.push(rec);
+  salvaDb(); $('dlgUtente').close(); renderUtenti();
+});
+
 // ---- menu pagine ----
-const PAGINE = { 'prima-nota': 'Prima nota', 'utenti': 'Utenti', 'annotazioni': 'Annotazioni' };
+const PAGINE = { 'prima-nota': 'Prima nota', 'utenti': 'Utenti', 'annotazioni': 'Annotazioni', 'livelli': 'Livelli' };
 function mostraPagina() {
   const pag = PAGINE[location.hash.slice(1)] ? location.hash.slice(1) : 'prima-nota';
   for (const p in PAGINE) $('pg-' + p).hidden = p !== pag;
   document.querySelectorAll('#menu a').forEach(a => a.classList.toggle('attiva', a.dataset.pagina === pag));
   if (pag === 'prima-nota') { $('sottotitolo').innerHTML = 'Prima nota — <span id="dataLabel"></span>'; render(); }
   else $('sottotitolo').textContent = PAGINE[pag];
+  if (pag === 'utenti') renderUtenti();
+  if (pag === 'livelli') renderLivelli();
   document.title = PAGINE[pag] + ' · ' + db.nomeCircolo;
   scrollTo(0, 0);
 }
