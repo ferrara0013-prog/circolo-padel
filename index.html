@@ -37,8 +37,14 @@
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
   button.danger { color: var(--danger); }
   button.small { padding: 3px 8px; font-size: 12px; }
-  .totali { width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(108px, 1fr)); gap: 8px; }
+  .totali { width: 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
   .totali > div { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+  .totali .tile-partenza { background: #fff; border: 1px dashed var(--accent); }
+  .tile-partenza .v { display: flex; align-items: baseline; gap: 4px; }
+  .tile-partenza input { width: 100%; min-width: 0; border: none; padding: 0; background: transparent;
+                         font: inherit; font-weight: 700; color: var(--text); outline: none; }
+  .tile-partenza input::-webkit-inner-spin-button { display: none; }
+  .tile-partenza:focus-within { box-shadow: 0 0 0 2px var(--accent); }
   .pren .nomep { font-weight: 600; font-size: 14px; margin-top: 2px; }
   .gratuita { color: #2c6fbb; font-style: italic; }
   .sospesa { color: #8e44ad; font-weight: 600; }
@@ -189,9 +195,13 @@
   .storico .stat b { display: block; font-size: 15px; }
   .storico .stat span { font-size: 10.5px; color: var(--muted); text-transform: uppercase; }
   .storico ul { list-style: none; margin: 0 0 10px; padding: 0; font-size: 13px; }
-  .storico li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #eef1f4; }
+  .storico li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; padding: 5px 0; border-top: 1px solid #eef1f4; }
   .storico li .imp { white-space: nowrap; font-weight: 600; }
   .storico .sosp li .imp { color: #8e44ad; }
+  .storico .h3-riga { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 8px; }
+  .storico .h3-riga h3 { margin: 0; }
+  .h2-dx { display: flex; align-items: center; gap: 10px; }
+  #ssAvviso { color: var(--warn); min-height: 1em; }
   .storico .nessuno { color: var(--muted); font-style: italic; font-size: 13px; }
 
   /* ---------- annotazioni ---------- */
@@ -317,6 +327,10 @@
   }
 
   @media (max-width: 640px) {
+    #frmSospeso { display: flex; flex-direction: column; min-height: 100%; }
+    #frmSospeso .dlg-b { flex: 1; }
+    #frmSospeso .row { flex-wrap: wrap; }
+    #frmSospeso .row label { flex: 1 1 calc(50% - 5px); }
     #frmUtente { display: flex; flex-direction: column; min-height: 100%; }
     #frmUtente .dlg-b { flex: 1; }
     .elenco-h .azioni-h { width: 100%; }
@@ -360,7 +374,7 @@
   }
 
   @media print {
-    #menu, .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
+    #menu, #btnNuovoSospeso, .toolbar button, .campo .add, .pren .azioni, #btnStampa, .movimento form, .movimento td button { display: none !important; }
     body { background: #fff; }
     .campi { grid-auto-flow: row; grid-template-columns: repeat(2, 1fr); }
   }
@@ -393,6 +407,10 @@
   <button class="primary" id="btnNuova">+ Nuova prenotazione</button>
   <button id="btnStampa">Stampa</button>
   <div class="totali">
+    <div class="tile-partenza" title="Contanti presenti in cassa all'apertura di questa giornata">
+      <div class="v"><span>€</span><input type="number" id="cassaPartenza" min="0" step="0.01" placeholder="0,00" inputmode="decimal"></div>
+      <div class="l">Cassa di partenza</div>
+    </div>
     <div><div class="v" id="totContanti">€ 0,00</div><div class="l">Contanti</div></div>
     <div><div class="v" id="totPos">€ 0,00</div><div class="l">POS</div></div>
     <div><div class="v" id="totApp">€ 0,00</div><div class="l">App</div></div>
@@ -416,7 +434,8 @@
   </div>
 
   <section class="movimento sospesi" style="margin-top:16px">
-    <h2>Quote in sospeso (tutte le date) <span class="tot" id="totSospesiSez">€ 0,00</span></h2>
+    <h2>Sospesi (tutte le date) <span class="h2-dx"><span class="tot" id="totSospesiSez">€ 0,00</span>
+      <button type="button" class="small" id="btnNuovoSospeso">+ Nuovo sospeso</button></span></h2>
     <div id="listaSospesi"></div>
   </section>
 
@@ -514,6 +533,31 @@
   </form>
 </dialog>
 
+<dialog id="dlgSospeso">
+  <form method="dialog" id="frmSospeso">
+    <div class="dlg-h">Nuovo sospeso</div>
+    <div class="dlg-b">
+      <div class="row">
+        <label>Utente <input type="text" id="ssNome" required placeholder="Scrivi nome o cognome" autocomplete="off" data-sugg></label>
+      </div>
+      <div class="row">
+        <label>Descrizione <input type="text" id="ssDesc" required placeholder="Es. tubo di palline, quota associativa…" autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <label>Categoria <select id="ssCat"></select></label>
+        <label>Importo € <input type="number" id="ssImp" min="0.01" step="0.01" required></label>
+        <label>Data <input type="date" id="ssData" required></label>
+      </div>
+      <div class="aiuto-mini" id="ssAvviso"></div>
+      <div class="err" id="errSospeso"></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" id="btnAnnullaSospeso">Annulla</button>
+      <button type="submit" class="primary">Salva sospeso</button>
+    </div>
+  </form>
+</dialog>
+
 <dialog id="dlgUtente">
   <form method="dialog" id="frmUtente">
     <div class="dlg-h" id="dlgUtenteTitolo">Nuovo utente</div>
@@ -560,6 +604,8 @@ if (!db.entrate) db.entrate = [];
 if (!db.utenti) db.utenti = [];
 if (!db.livelli) db.livelli = [];
 if (!db.annotazioni) db.annotazioni = [];
+if (!db.sospesi) db.sospesi = [];
+if (!db.cassaPartenza) db.cassaPartenza = {};   // contanti in cassa all'apertura, per data   // sospesi inseriti a mano (palline, quota associativa…)
 const salvaDb = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { alert('Impossibile salvare i dati'); } };
 
 const $ = id => document.getElementById(id);
@@ -584,6 +630,12 @@ $('numCampi').addEventListener('change', e => {
 $('quotaDef').value = db.quotaDef;
 $('quotaDef').addEventListener('change', e => { db.quotaDef = parseFloat(e.target.value) || 0; salvaDb(); });
 $('btnStampa').addEventListener('click', () => window.print());
+$('cassaPartenza').addEventListener('change', e => {
+  const v = parseFloat(String(e.target.value).replace(',', '.'));
+  if (isNaN(v) || v < 0) delete db.cassaPartenza[dataSel]; else db.cassaPartenza[dataSel] = Math.round(v * 100) / 100;
+  salvaDb(); render();
+});
+$('cassaPartenza').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
 $('btnNuova').addEventListener('click', () => apriDialog());
 
 // ---- form quote ----
@@ -720,11 +772,15 @@ for (const tipo of Object.keys(MOV)) {
 }
 function eliminaMov(tipo, id) {
   const u = db[tipo].find(x => x.id === id);
-  const avviso = u.quotaRef ? '\nLa quota tornerà in sospeso.' : '';
+  const avviso = u.quotaRef ? '\nLa quota tornerà in sospeso.' : u.sospesoRef ? '\nIl sospeso tornerà da incassare.' : '';
   if (!confirm(`Eliminare ${MOV[tipo].singolare} "${u.descrizione}" di ${eur(u.importo)}?${avviso}`)) return;
   if (u.quotaRef) {
     const p = db.prenotazioni.find(x => x.id === u.quotaRef.id);
     if (p) delete p.quote[u.quotaRef.i].saldo;
+  }
+  if (u.sospesoRef) {
+    const x = db.sospesi.find(s => s.id === u.sospesoRef);
+    if (x) delete x.saldo;
   }
   db[tipo] = db[tipo].filter(x => x.id !== id);
   salvaDb(); render();
@@ -805,7 +861,10 @@ function render() {
   $('totGiorno').textContent = eur(contanti + pos + app + ent.perMetodo('Bonifico'));
   $('totEntrate').textContent = eur(ent.tot);
   $('totUscite').textContent = eur(usc.tot);
-  const saldo = contanti - usc.perMetodo('Contanti');
+  const partenza = db.cassaPartenza[dataSel] || 0;
+  if (document.activeElement !== $('cassaPartenza'))
+    $('cassaPartenza').value = db.cassaPartenza[dataSel] != null ? db.cassaPartenza[dataSel].toFixed(2) : '';
+  const saldo = partenza + contanti - usc.perMetodo('Contanti');
   $('saldoCassa').textContent = eur(saldo);
   $('saldoCassa').classList.toggle('neg', saldo < 0);
   renderSospesi();
@@ -814,26 +873,43 @@ function render() {
 
 const dataIt = d => new Date(d + 'T12:00').toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-// ---- quote in sospeso ----
-function renderSospesi() {
+// ---- sospesi: quote dei campi + sospesi inseriti a mano ----
+function tuttiSospesi() {
   const righe = [];
   db.prenotazioni.forEach(p => p.quote.forEach((q, i) => {
-    if (q.metodo === 'Sospeso' && !q.saldo) righe.push({ p, q, i });
+    if (q.metodo === 'Sospeso' && !q.saldo)
+      righe.push({ tipo: 'quota', p, q, i, data: p.data, ord: p.data + p.dalle, importo: q.importo, nome: q.nome,
+                   uid: q.utenteId || utenteDaNome(q.nome) });
   }));
-  righe.sort((a, b) => (a.p.data + a.p.dalle).localeCompare(b.p.data + b.p.dalle));
-  const tot = righe.reduce((s, r) => s + r.q.importo, 0);
+  db.sospesi.forEach(x => {
+    if (!x.saldo) righe.push({ tipo: 'manuale', x, data: x.data, ord: x.data + '99', importo: x.importo, nome: x.nome,
+                               uid: x.utenteId || utenteDaNome(x.nome) });
+  });
+  return righe.sort((a, b) => a.ord.localeCompare(b.ord));
+}
+function renderSospesi() {
+  const righe = tuttiSospesi();
+  const tot = righe.reduce((s, r) => s + r.importo, 0);
   $('totSospesi').textContent = eur(tot);
   $('totSospesiSez').textContent = eur(tot);
+  const metodi = MOV.entrate.metodi.map(m => `<option>${m}</option>`).join('');
   $('listaSospesi').innerHTML = righe.length
-    ? `<table class="t-sosp"><thead><tr><th>Data</th><th>Campo</th><th>Prenotazione</th><th>Giocatore</th><th class="imp">Importo</th><th>Incassa con</th><th></th></tr></thead><tbody>${
-        righe.map(({ p, q, i }) => `<tr>
-          <td>${dataIt(p.data)}</td><td>Campo ${p.campo}</td><td>${esc(p.nome || '')} ${p.dalle}–${p.alle}</td>
-          <td>${q.nome ? esc(q.nome) : `<span style="color:var(--muted)">Quota ${i + 1}</span>`}</td>
-          <td class="imp">${eur(q.importo)}</td>
-          <td><select id="sm_${p.id}_${i}">${MOV.entrate.metodi.map(m => `<option>${m}</option>`).join('')}</select></td>
-          <td style="width:80px"><button class="small primary" onclick="saldaSospeso('${p.id}',${i})">Incassa</button></td></tr>`).join('')
+    ? `<table class="t-sosp"><thead><tr><th>Data</th><th>Tipo</th><th>Descrizione</th><th>Utente</th><th class="imp">Importo</th><th>Incassa con</th><th></th></tr></thead><tbody>${
+        righe.map(r => r.tipo === 'quota' ? `<tr>
+          <td>${dataIt(r.p.data)}</td><td>Campo ${r.p.campo}</td><td>${esc(r.p.nome || '')} ${r.p.dalle}–${r.p.alle}</td>
+          <td>${r.q.nome ? esc(r.q.nome) : `<span style="color:var(--muted)">Quota ${r.i + 1}</span>`}</td>
+          <td class="imp">${eur(r.importo)}</td>
+          <td><select id="sm_${r.p.id}_${r.i}">${metodi}</select></td>
+          <td style="width:80px"><button class="small primary" onclick="saldaSospeso('${r.p.id}',${r.i})">Incassa</button></td></tr>`
+        : `<tr>
+          <td>${dataIt(r.x.data)}</td><td>${esc(r.x.categoria)}</td><td>${esc(r.x.descrizione)}</td>
+          <td>${esc(r.x.nome)}</td>
+          <td class="imp">${eur(r.importo)}</td>
+          <td><select id="sm_s_${r.x.id}">${metodi}</select></td>
+          <td style="width:80px;white-space:nowrap"><button class="small primary" onclick="saldaManuale('${r.x.id}')">Incassa</button>
+              <button class="small danger" title="Elimina sospeso" onclick="eliminaManuale('${r.x.id}')">✕</button></td></tr>`).join('')
       }</tbody></table>`
-    : '<div class="vuoto">Nessuna quota in sospeso</div>';
+    : '<div class="vuoto">Nessun sospeso</div>';
 }
 
 // l'incasso di una quota in sospeso viene registrato come entrata nella data selezionata
@@ -841,13 +917,66 @@ function saldaSospeso(id, i) {
   const p = db.prenotazioni.find(x => x.id === id), q = p.quote[i];
   const metodo = $(`sm_${id}_${i}`).value;
   if (!confirm(`Incassare ${eur(q.importo)} da ${q.nome || 'Quota ' + (i + 1)} (${p.nome || ''} del ${dataIt(p.data)}) con ${metodo}, nella prima nota del ${dataIt(dataSel)}?`)) return;
-  const ent = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data: dataSel,
+  const ent = { id: nuovoId(), data: dataSel,
     ora: new Date().toTimeString().slice(0, 5),
     descrizione: `Saldo sospeso ${q.nome || 'Quota ' + (i + 1)} · ${p.nome || ''} Campo ${p.campo} del ${dataIt(p.data)}`,
     categoria: 'Quote in sospeso', importo: q.importo, metodo, quotaRef: { id, i } };
   db.entrate.push(ent);
   q.saldo = { data: dataSel, metodo, entrataId: ent.id };
   salvaDb(); render();
+}
+
+// ---- sospesi inseriti a mano ----
+let ssDopo = null;   // cosa aggiornare dopo il salvataggio (es. la scheda utente aperta)
+function apriSospeso(utente, dopo) {
+  ssDopo = dopo || null;
+  $('ssCat').innerHTML = MOV.entrate.categorie.map(c => `<option>${c}</option>`).join('');
+  $('ssNome').value = utente ? nomeUtente(utente) : '';
+  $('ssNome').dataset.utente = utente ? utente.id : '';
+  $('ssNome').classList.toggle('collegato', !!utente);
+  $('ssDesc').value = ''; $('ssImp').value = '';
+  $('ssCat').value = 'Altro';
+  $('ssData').value = dataSel;
+  $('errSospeso').textContent = ''; $('ssAvviso').textContent = '';
+  $('dlgSospeso').showModal();
+  (utente ? $('ssDesc') : $('ssNome')).focus();
+}
+$('btnNuovoSospeso').addEventListener('click', () => apriSospeso());
+$('btnAnnullaSospeso').addEventListener('click', () => $('dlgSospeso').close());
+$('ssNome').addEventListener('change', () => {
+  $('ssAvviso').textContent = $('ssNome').value.trim() && !utenteDaNome($('ssNome').value, $('ssNome').dataset.utente)
+    ? 'Nome non presente negli utenti: il sospeso non comparirà in nessuna scheda utente.' : '';
+});
+$('frmSospeso').addEventListener('submit', e => {
+  e.preventDefault();
+  const nome = $('ssNome').value.replace(/\s+/g, ' ').trim(), descrizione = $('ssDesc').value.trim();
+  const importo = parseFloat($('ssImp').value), data = $('ssData').value;
+  if (!nome || !descrizione || !(importo > 0) || !data) return $('errSospeso').textContent = 'Compila utente, descrizione, importo e data.';
+  const uid = utenteDaNome(nome, $('ssNome').dataset.utente);
+  if (!uid && !confirm(`"${nome}" non è tra gli utenti registrati. Salvare comunque il sospeso?`)) return;
+  db.sospesi.push({ id: nuovoId(), data, nome, utenteId: uid, descrizione, categoria: $('ssCat').value, importo, creato: Date.now() });
+  salvaDb(); $('dlgSospeso').close();
+  render();
+  if (ssDopo) ssDopo();
+});
+function saldaManuale(id, metodoScelto, dopo) {
+  const x = db.sospesi.find(s => s.id === id);
+  const metodo = metodoScelto || $('sm_s_' + id).value;
+  if (!confirm(`Incassare ${eur(x.importo)} da ${x.nome} (${x.descrizione} del ${dataIt(x.data)}) con ${metodo}, nella prima nota del ${dataIt(dataSel)}?`)) return;
+  const ent = { id: nuovoId(), data: dataSel, ora: new Date().toTimeString().slice(0, 5),
+    descrizione: `Saldo sospeso ${x.nome} · ${x.descrizione} del ${dataIt(x.data)}`,
+    categoria: x.categoria, importo: x.importo, metodo, sospesoRef: id };
+  db.entrate.push(ent);
+  x.saldo = { data: dataSel, metodo, entrataId: ent.id };
+  salvaDb(); render();
+  if (dopo) dopo();
+}
+function eliminaManuale(id, dopo) {
+  const x = db.sospesi.find(s => s.id === id);
+  if (!confirm(`Eliminare il sospeso "${x.descrizione}" di ${eur(x.importo)} di ${x.nome}?`)) return;
+  db.sospesi = db.sospesi.filter(s => s.id !== id);
+  salvaDb(); render();
+  if (dopo) dopo();
 }
 
 // ---- nome giocatore modificabile direttamente nella colonna ----
@@ -1009,14 +1138,12 @@ const COL_UTENTI = [
 let cacheSospesi = new Map();
 function calcolaSospesi() {
   cacheSospesi = new Map();
-  db.prenotazioni.forEach(p => p.quote.forEach(q => {
-    if (q.metodo !== 'Sospeso' || q.saldo) return;
-    const uid = q.utenteId || utenteDaNome(q.nome);
+  tuttiSospesi().forEach(({ uid, importo }) => {
     if (!uid) return;
     const r = cacheSospesi.get(uid) || { tot: 0, n: 0 };
-    r.tot += q.importo; r.n++;
+    r.tot += importo; r.n++;
     cacheSospesi.set(uid, r);
-  }));
+  });
 }
 const sospesiDi = u => cacheSospesi.get(u.id) || { tot: 0, n: 0 };
 let filtriUtenti = {}, ordUtenti = { k: 'cognome', dir: 1 };
@@ -1089,7 +1216,7 @@ function renderCorpoUtenti() {
       <td>${esc(u.ruolo || '')}</td>
       <td class="disp">${esc(testoDisp(u))}</td>
       <td>${u.livelloId && nomeLivello(u.livelloId) ? `<span class="badge">${esc(nomeLivello(u.livelloId))}</span>` : ''}</td>
-      <td>${sospesiDi(u).n ? `<span class="badge sosp" title="${sospesiDi(u).n} ${sospesiDi(u).n === 1 ? 'quota' : 'quote'} in sospeso">${eur(sospesiDi(u).tot)}</span>` : ''}</td>
+      <td>${sospesiDi(u).n ? `<span class="badge sosp" title="${sospesiDi(u).n} ${sospesiDi(u).n === 1 ? 'sospeso' : 'sospesi'}">${eur(sospesiDi(u).tot)}</span>` : ''}</td>
       <td class="az"><button type="button" class="small" onclick="apriUtente('${u.id}')">Modifica</button></td>
     </tr>`).join('')
     : `<tr><td colspan="9" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
@@ -1238,15 +1365,30 @@ document.addEventListener('focusout', e => { if (e.target === suggEl) setTimeout
 window.addEventListener('scroll', () => { if (!sugg.hidden) nascondiSugg(); }, true);
 
 // ---- storico dell'utente (partite e quote in sospeso) ----
+function aggiornaStorico() {
+  const u = db.utenti.find(x => x.id === utenteId);
+  if (u && $('dlgUtente').open) $('utStorico').innerHTML = htmlStorico(u);
+  if (!$('pg-utenti').hidden) renderCorpoUtenti();
+}
 function htmlStorico(u) {
   const righe = [];
   db.prenotazioni.forEach(p => p.quote.forEach((q, i) => {
     if (q.utenteId === u.id || (!q.utenteId && utenteDaNome(q.nome) === u.id)) righe.push({ p, q, i });
   }));
   righe.sort((a, b) => (b.p.data + b.p.dalle).localeCompare(a.p.data + a.p.dalle));
-  const pagato = righe.reduce((s, { q }) => s + ((q.metodo === 'Sospeso' ? !!q.saldo : q.pagato && !GRATUITI.includes(q.metodo)) ? q.importo : 0), 0);
+  const manuali = db.sospesi.filter(x => x.utenteId === u.id || (!x.utenteId && utenteDaNome(x.nome) === u.id))
+    .sort((a, b) => b.data.localeCompare(a.data) || (b.creato || 0) - (a.creato || 0));
+  const manAperti = manuali.filter(x => !x.saldo), manSaldati = manuali.filter(x => x.saldo);
+  const pagato = righe.reduce((s, { q }) => s + ((q.metodo === 'Sospeso' ? !!q.saldo : q.pagato && !GRATUITI.includes(q.metodo)) ? q.importo : 0), 0)
+               + manSaldati.reduce((s, x) => s + x.importo, 0);
   const sospesi = righe.filter(({ q }) => q.metodo === 'Sospeso' && !q.saldo);
-  const totSosp = sospesi.reduce((s, { q }) => s + q.importo, 0);
+  const totSosp = sospesi.reduce((s, { q }) => s + q.importo, 0) + manAperti.reduce((s, x) => s + x.importo, 0);
+  const metodi = MOV.entrate.metodi.map(m => `<option>${m}</option>`).join('');
+  const rigaMan = x => `<li><span>${dataIt(x.data)} · ${esc(x.descrizione)} <span style="color:var(--muted)">(${esc(x.categoria)})</span></span>
+      <span class="imp">${eur(x.importo)} ${x.saldo ? `saldato il ${dataIt(x.saldo.data)} (${x.saldo.metodo})` : `in sospeso
+        <select id="smu_${x.id}" style="padding:2px 4px;font-size:12px">${metodi}</select>
+        <button type="button" class="small primary" onclick="saldaManuale('${x.id}', $('smu_${x.id}').value, aggiornaStorico)">Incassa</button>
+        <button type="button" class="small danger" onclick="eliminaManuale('${x.id}', aggiornaStorico)">✕</button>`}</span></li>`;
   const riga = ({ p, q }) => `<li><span>${dataIt(p.data)} · Campo ${p.campo} · ${p.dalle}–${p.alle} · ${esc(p.nome || '')}</span>
       <span class="imp">${GRATUITI.includes(q.metodo) ? q.metodo : eur(q.importo) + ' ' + (q.metodo === 'Sospeso' ? (q.saldo ? 'saldata' : 'in sospeso') : q.pagato ? q.metodo : 'da pagare')}</span></li>`;
   return `<div class="storico">
@@ -1257,7 +1399,9 @@ function htmlStorico(u) {
       <div><b>${eur(pagato)}</b><span>Pagato</span></div>
       <div><b style="color:#8e44ad">${eur(totSosp)}</b><span>In sospeso</span></div>
     </div>
-    ${sospesi.length ? `<h3>Quote in sospeso</h3><ul class="sosp">${sospesi.map(riga).join('')}</ul>` : ''}
+    <div class="h3-riga"><h3>Sospesi</h3><button type="button" class="small" onclick="apriSospeso(db.utenti.find(x => x.id === '${u.id}'), aggiornaStorico)">+ Aggiungi sospeso</button></div>
+    ${sospesi.length || manAperti.length ? `<ul class="sosp">${sospesi.map(riga).join('')}${manAperti.map(rigaMan).join('')}</ul>` : '<div class="nessuno" style="margin-bottom:10px">Nessun sospeso.</div>'}
+    ${manSaldati.length ? `<h3>Sospesi già incassati</h3><ul>${manSaldati.slice(0, 10).map(rigaMan).join('')}</ul>` : ''}
     ${righe.length ? `<h3>Ultime partite${righe.length > 10 ? ' (10 di ' + righe.length + ')' : ''}</h3><ul>${righe.slice(0, 10).map(riga).join('')}</ul>`
                    : '<div class="nessuno">Nessuna partita registrata in prima nota.</div>'}
   </div>`;
