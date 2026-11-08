@@ -135,6 +135,7 @@
   .t-utenti td.nome { font-weight: 600; }
   .t-utenti a { color: inherit; }
   .t-utenti td.az { white-space: nowrap; text-align: right; }
+  .badge.sosp { background: #f3eaf8; color: #8e44ad; }
   .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; background: #e8effa; color: #2c6fbb; font-size: 12px; font-weight: 600; }
   .disp { font-size: 12px; color: var(--muted); }
   .aiuto { color: var(--muted); padding: 12px 14px 0; margin: 0; }
@@ -147,11 +148,69 @@
   ol.livelli button { flex: none; }
   ol.livelli .n { font-size: 12px; color: var(--muted); white-space: nowrap; }
   .campo-gruppo .etichetta { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .aiuto-mini { font-size: 11px; }
+  .griglia-disp { width: calc(100% + 8px); table-layout: fixed; border-collapse: separate; border-spacing: 4px; margin: 0 -4px; }
+  .griglia-disp thead th:first-child { width: 44px; }
+  .griglia-disp th { padding: 0; }
+  .griglia-disp th button { width: 100%; background: none; border: none; padding: 4px 2px; min-height: 0;
+                            font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .griglia-disp th button:hover { color: var(--accent); }
+  .griglia-disp tbody th { width: 44px; }
+  .griglia-disp tbody th button { text-align: left; color: var(--text); font-size: 13px; }
+  .griglia-disp td { padding: 0; }
+  .griglia-disp .cella { display: block; position: relative; }
+  .griglia-disp .cella input { position: absolute; opacity: 0; pointer-events: none; }
+  .griglia-disp .cella span { display: flex; align-items: center; justify-content: center; height: 34px; border: 1px solid var(--border);
+                              border-radius: 6px; background: #fff; cursor: pointer; color: transparent; font-weight: 700; user-select: none; }
+  .griglia-disp .cella input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .griglia-disp .cella input:focus-visible + span { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 4px var(--accent); }
+  .griglia-disp .corto { display: none; }
+  .t-utenti td.disp { max-width: 300px; }
+  .t-utenti .filtri .f-disp { display: flex; gap: 4px; }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip input { position: absolute; opacity: 0; pointer-events: none; }
   .chip span { display: inline-block; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; cursor: pointer; user-select: none; }
   .chip input:checked + span { background: var(--accent); border-color: var(--accent); color: #fff; }
   .chip input:focus-visible + span { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 4px var(--accent); }
+
+  /* ---------- collegamento utenti ---------- */
+  #suggerimenti { position: fixed; z-index: 1000; background: #fff; border: 1px solid var(--border); border-radius: 8px;
+                  box-shadow: 0 8px 24px rgba(0,0,0,.18); overflow: hidden; max-width: calc(100vw - 16px); }
+  #suggerimenti[hidden] { display: none; }
+  #suggerimenti .s-item { padding: 9px 12px; cursor: pointer; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  #suggerimenti .s-item span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+  #suggerimenti .s-item.sel { background: var(--accent-soft); }
+  .nomeq.collegato, .quote input.collegato { text-decoration: underline dotted var(--accent); text-underline-offset: 3px; }
+  .quote input.collegato { color: var(--accent); }
+  .storico { border-top: 1px solid var(--border); padding-top: 12px; }
+  .storico h3 { font-size: 14px; margin: 0 0 8px; }
+  .storico .stat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+  .storico .stat div { background: var(--bg); border-radius: 8px; padding: 6px 8px; }
+  .storico .stat b { display: block; font-size: 15px; }
+  .storico .stat span { font-size: 10.5px; color: var(--muted); text-transform: uppercase; }
+  .storico ul { list-style: none; margin: 0 0 10px; padding: 0; font-size: 13px; }
+  .storico li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #eef1f4; }
+  .storico li .imp { white-space: nowrap; font-weight: 600; }
+  .storico .sosp li .imp { color: #8e44ad; }
+  .storico .nessuno { color: var(--muted); font-style: italic; font-size: 13px; }
+
+  /* ---------- annotazioni ---------- */
+  textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; width: 100%; resize: vertical; color: var(--text); }
+  .form-nota { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--border); }
+  .form-nota label.blocco { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .form-nota.in-modifica { background: var(--warn-soft); }
+  .azioni-form { display: flex; justify-content: flex-end; gap: 8px; }
+  .filtri-note { display: flex; gap: 8px; padding: 12px 14px 0; }
+  .filtri-note input { flex: 2; min-width: 0; }
+  .filtri-note select { flex: 1; min-width: 0; }
+  .nota-card { margin: 12px 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; }
+  .nota-card .testa { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .nota-card .quando { font-weight: 700; }
+  .nota-card .chi { font-size: 12px; color: var(--muted); }
+  .nota-card .testo { white-space: pre-wrap; margin-top: 6px; overflow-wrap: anywhere; }
+  .nota-card .azioni { display: flex; gap: 4px; }
+  #listaNote { padding-bottom: 2px; }
+  #listaNote > .vuoto { padding: 24px 0; }
 
   /* ---------- touch (telefono e iPad) ---------- */
   @media (pointer: coarse) {
@@ -268,16 +327,22 @@
     .t-utenti .filtri { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
     .t-utenti .filtri th { padding: 0; border: none; }
     .t-utenti .filtri th:empty { display: none; }
+    .t-utenti .filtri th.f-disp { grid-column: 1 / -1; }
+    .t-utenti .filtri .f-disp select { flex: 1; }
+    .griglia-disp .lungo { display: none; }
+    .griglia-disp .corto { display: inline; }
+    .griglia-disp .cella span { height: 38px; }
     .t-utenti tbody tr { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; padding: 10px 14px; border-bottom: 1px solid #eef1f4; }
     .t-utenti tbody td { padding: 0; border: none; }
     .t-utenti tbody td:nth-child(1) { order: 1; font-size: 16px; }
     .t-utenti tbody td:nth-child(2) { order: 2; font-size: 16px; }
     .t-utenti tbody td:nth-child(7) { order: 3; margin-left: auto; }
-    .t-utenti tbody td:nth-child(3) { order: 4; flex-basis: 100%; }
-    .t-utenti tbody td:nth-child(4) { order: 5; flex-basis: 100%; color: var(--muted); }
-    .t-utenti tbody td:nth-child(5) { order: 6; font-weight: 600; }
-    .t-utenti tbody td:nth-child(6) { order: 7; }
-    .t-utenti tbody td:nth-child(8) { order: 8; margin-left: auto; }
+    .t-utenti tbody td:nth-child(8) { order: 4; }
+    .t-utenti tbody td:nth-child(3) { order: 5; flex-basis: 100%; }
+    .t-utenti tbody td:nth-child(4) { order: 6; flex-basis: 100%; color: var(--muted); }
+    .t-utenti tbody td:nth-child(5) { order: 7; font-weight: 600; }
+    .t-utenti tbody td:nth-child(6) { order: 8; }
+    .t-utenti tbody td:nth-child(9) { order: 9; margin-left: auto; }
     .t-utenti tbody td:empty { display: none; }
     .t-utenti tbody td.vuoto { flex-basis: 100%; }
     ol.livelli li { gap: 5px; }
@@ -285,6 +350,13 @@
     ol.livelli button.small { padding: 6px 9px; }
     .riga-add { flex-wrap: wrap; }
     .riga-add input, .riga-add button { flex-basis: 100%; }
+  }
+
+  @media (max-width: 640px) {
+    .storico .stat { grid-template-columns: repeat(2, 1fr); }
+    .form-nota .row { flex-direction: column; }
+    .nota-card { margin: 10px 12px; }
+    textarea { font-size: 16px; }
   }
 
   @media print {
@@ -391,9 +463,26 @@
 
 <div class="pagina" id="pg-annotazioni" hidden>
   <main>
-    <section class="in-arrivo">
-      <h2>Annotazioni</h2>
-      <p>Questa sezione è in preparazione.</p>
+    <section class="elenco stretto">
+      <div class="elenco-h"><h2>Annotazioni <span class="conta" id="contaNote"></span></h2></div>
+      <form id="frmNota" class="form-nota">
+        <div class="row">
+          <label>Data <input type="date" id="notaData" required></label>
+          <label>Staff <input type="text" id="notaStaff" list="elencoStaff" required placeholder="Chi scrive la nota" autocomplete="off"></label>
+        </div>
+        <label class="blocco">Nota <textarea id="notaTesto" rows="4" required placeholder="Scrivi la nota…"></textarea></label>
+        <div class="err" id="errNota"></div>
+        <div class="azioni-form">
+          <button type="button" id="btnAnnullaNota" hidden>Annulla modifica</button>
+          <button type="submit" class="primary" id="btnSalvaNota">Salva nota</button>
+        </div>
+      </form>
+      <datalist id="elencoStaff"></datalist>
+      <div class="filtri-note">
+        <input type="search" id="cercaNote" placeholder="Cerca nelle note…">
+        <select id="filtroStaff"></select>
+      </div>
+      <div id="listaNote"></div>
     </section>
   </main>
 </div>
@@ -442,11 +531,10 @@
         <label>Livello <select id="utLivello"></select></label>
       </div>
       <div class="campo-gruppo">
-        <div class="etichetta">Disponibilità — giorni</div>
-        <div class="chips" id="utGiorni"></div>
-        <div class="etichetta" style="margin-top:8px">Disponibilità — fasce orarie</div>
-        <div class="chips" id="utFasce"></div>
+        <div class="etichetta">Disponibilità <span class="aiuto-mini">— tocca un giorno o una fascia per selezionare tutta la riga o la colonna</span></div>
+        <table class="griglia-disp" id="utDisp"></table>
       </div>
+      <div id="utStorico"></div>
       <div class="err" id="errUtente"></div>
     </div>
     <div class="dlg-f">
@@ -471,6 +559,7 @@ if (!db.uscite) db.uscite = [];
 if (!db.entrate) db.entrate = [];
 if (!db.utenti) db.utenti = [];
 if (!db.livelli) db.livelli = [];
+if (!db.annotazioni) db.annotazioni = [];
 const salvaDb = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { alert('Impossibile salvare i dati'); } };
 
 const $ = id => document.getElementById(id);
@@ -502,7 +591,7 @@ const qBox = $('quote');
 for (let i = 0; i < 4; i++) {
   qBox.insertAdjacentHTML('beforeend', `
     <span>${i + 1}</span>
-    <input type="text" id="qNome${i}" placeholder="Nome giocatore ${i + 1}">
+    <input type="text" id="qNome${i}" placeholder="Nome giocatore ${i + 1}" autocomplete="off" data-sugg>
     <input type="number" id="qImp${i}" min="0" step="0.5">
     <select id="qMet${i}">${METODI.map(m => `<option>${m}</option>`).join('')}</select>
     <input type="checkbox" id="qPag${i}">`);
@@ -537,6 +626,8 @@ function apriDialog(campo, p) {
   for (let i = 0; i < 4; i++) {
     const q = p ? p.quote[i] : { nome: '', importo: db.quotaDef, metodo: 'Contanti', pagato: false };
     $('qNome' + i).value = q.nome; $('qImp' + i).value = q.importo;
+    $('qNome' + i).dataset.utente = q.utenteId || '';
+    $('qNome' + i).classList.toggle('collegato', !!utenteDaNome(q.nome, q.utenteId));
     $('qMet' + i).value = q.metodo; $('qPag' + i).checked = q.pagato;
     aggiornaQuotaGratuita(i, false);
   }
@@ -569,6 +660,8 @@ $('frm').addEventListener('submit', e => {
                 metodo, pagato: gratuita || (!sospeso && $('qPag' + i).checked) };
     const prec = modificaQuote && modificaQuote[i];
     if (sospeso && prec && prec.saldo) q.saldo = prec.saldo;
+    const uid = utenteDaNome(q.nome, $('qNome' + i).dataset.utente);
+    if (uid) q.utenteId = uid;
     return q;
   });
   const rec = { id: modificaId || Date.now().toString(36) + Math.random().toString(36).slice(2, 6), data: dataSel, nome, campo, dalle, alle, quote, note: $('fNote').value.trim() };
@@ -674,8 +767,8 @@ function render() {
           if (q.metodo === 'POS') pos += q.importo; else if (q.metodo === 'App') app += q.importo; else contanti += q.importo;
         } else { incompleta = true; daInc += q.importo; }
         return `<tr>
-          <td><span class="nomeq ${q.nome ? '' : 'vuota'}" contenteditable="true" spellcheck="false"
-                data-id="${p.id}" data-i="${i}" data-ph="Quota ${i + 1}" title="Clicca per scrivere il nome del giocatore">${esc(q.nome || '')}</span></td>
+          <td><span class="nomeq ${q.nome ? '' : 'vuota'} ${utenteDaNome(q.nome, q.utenteId) ? 'collegato' : ''}" contenteditable="true" spellcheck="false" data-sugg
+                data-utente="${q.utenteId || ''}" data-id="${p.id}" data-i="${i}" data-ph="Quota ${i + 1}" title="Clicca per scrivere il nome del giocatore">${esc(q.nome || '')}</span></td>
           <td class="met">${q.metodo}</td>
           <td class="imp ${gratuita ? 'gratuita' : sospeso ? (q.saldo ? 'saldata' : 'sospesa') : q.pagato ? '' : 'nonpag'}"
               title="${sospeso && q.saldo ? `Saldata il ${dataIt(q.saldo.data)} (${q.saldo.metodo})` : ''}">${gratuita ? q.metodo : eur(q.importo)}${sospeso && q.saldo ? ' ✓' : ''}</td>
@@ -777,8 +870,11 @@ document.addEventListener('focusout', e => {
   const nome = e.target.textContent.replace(/\s+/g, ' ').trim();
   e.target.textContent = nome;
   const q = p.quote[e.target.dataset.i];
-  if (q.nome === nome) return;
+  const uid = utenteDaNome(nome, e.target.dataset.utente);
+  e.target.classList.toggle('collegato', !!uid);
+  if (q.nome === nome && (q.utenteId || '') === uid) return;
   q.nome = nome;
+  if (uid) q.utenteId = uid; else delete q.utenteId;
   salvaDb();
   renderPos();
 });
@@ -873,11 +969,30 @@ function eliminaLivello(id) {
 // ================= UTENTI =================
 const RUOLI = ['DX', 'SX', 'DX e SX'];
 const GIORNI = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-const FASCE = ['Mattina', 'Pomeriggio', 'Sera'];
+const FASCE = ['Mattina', 'Pranzo', 'Pomeriggio', 'Sera'];
+const FASCE_CORTE = { Mattina: 'Matt.', Pranzo: 'Pranzo', Pomeriggio: 'Pom.', Sera: 'Sera' };
+const fasceDi = (u, g) => FASCE.filter(f => ((u.disp || {})[g] || []).includes(f));
+// vecchio formato (giorni + fasce separati) → disponibilità per giorno
+db.utenti.forEach(u => {
+  if (u.disp || (!u.giorni && !u.fasce)) return;
+  const giorni = (u.giorni && u.giorni.length) ? u.giorni : (u.fasce && u.fasce.length ? GIORNI : []);
+  const fasce = (u.fasce && u.fasce.length) ? u.fasce : FASCE;
+  u.disp = {};
+  giorni.forEach(g => u.disp[g] = [...fasce]);
+  delete u.giorni; delete u.fasce;
+});
 const nomeLivello = id => (db.livelli.find(l => l.id === id) || {}).nome || '';
 const testoDisp = u => {
-  const g = (u.giorni || []), f = (u.fasce || []);
-  return [g.length === 7 ? 'Tutti i giorni' : g.join(' '), f.join(', ')].filter(Boolean).join(' · ');
+  // raggruppa i giorni che hanno le stesse fasce: "Lun Mer: Sera · Sab Dom: Mattina, Pranzo"
+  const gruppi = new Map();
+  GIORNI.forEach(g => {
+    const f = fasceDi(u, g);
+    if (!f.length) return;
+    const k = f.length === FASCE.length ? 'tutto il giorno' : f.join(', ');
+    if (!gruppi.has(k)) gruppi.set(k, []);
+    gruppi.get(k).push(g);
+  });
+  return [...gruppi].map(([f, gg]) => (gg.length === 7 ? 'Tutti i giorni' : gg.join(' ')) + ': ' + f).join(' · ');
 };
 const COL_UTENTI = [
   { k: 'cognome',  t: 'Cognome',       f: 'testo',  v: u => u.cognome },
@@ -885,10 +1000,25 @@ const COL_UTENTI = [
   { k: 'telefono', t: 'Telefono',      f: 'testo',  v: u => u.telefono },
   { k: 'email',    t: 'Email',         f: 'testo',  v: u => u.email },
   { k: 'ruolo',    t: 'Ruolo',         f: 'scelta', v: u => u.ruolo, opz: () => RUOLI },
-  { k: 'disp',     t: 'Disponibilità', f: 'scelta', v: testoDisp, opz: () => [...GIORNI, ...FASCE] },
+  { k: 'disp',     t: 'Disponibilità', f: 'disp',   v: testoDisp },
   { k: 'livello',  t: 'Livello',       f: 'scelta', v: u => nomeLivello(u.livelloId), opz: () => db.livelli.map(l => l.nome),
     ord: u => { const i = db.livelli.findIndex(l => l.id === u.livelloId); return i < 0 ? 9999 : i; } },
+  { k: 'sospesi',  t: 'Sospesi',       f: 'sospesi', v: u => sospesiDi(u).tot, ord: u => sospesiDi(u).tot },
 ];
+// quote in sospeso non ancora incassate, per utente (ricalcolato a ogni visualizzazione dell'elenco)
+let cacheSospesi = new Map();
+function calcolaSospesi() {
+  cacheSospesi = new Map();
+  db.prenotazioni.forEach(p => p.quote.forEach(q => {
+    if (q.metodo !== 'Sospeso' || q.saldo) return;
+    const uid = q.utenteId || utenteDaNome(q.nome);
+    if (!uid) return;
+    const r = cacheSospesi.get(uid) || { tot: 0, n: 0 };
+    r.tot += q.importo; r.n++;
+    cacheSospesi.set(uid, r);
+  }));
+}
+const sospesiDi = u => cacheSospesi.get(u.id) || { tot: 0, n: 0 };
 let filtriUtenti = {}, ordUtenti = { k: 'cognome', dir: 1 };
 
 function renderUtenti() {
@@ -899,6 +1029,15 @@ function renderUtenti() {
   // riga dei filtri, uno per colonna
   $('filtriUtenti').innerHTML = COL_UTENTI.map(c => {
     const val = filtriUtenti[c.k] || '';
+    if (c.f === 'disp') {
+      const g = filtriUtenti.disp_g || '', f = filtriUtenti.disp_f || '';
+      return `<th class="f-disp"><select data-k="disp_g" class="${g ? 'attivo' : ''}"><option value="">Giorno: tutti</option>${
+        GIORNI.map(o => `<option ${o === g ? 'selected' : ''}>${o}</option>`).join('')}</select><select data-k="disp_f" class="${f ? 'attivo' : ''}"><option value="">Fascia: tutte</option>${
+        FASCE.map(o => `<option ${o === f ? 'selected' : ''}>${o}</option>`).join('')}</select></th>`;
+    }
+    if (c.f === 'sospesi')
+      return `<th><select data-k="sospesi" class="${val ? 'attivo' : ''}"><option value="">Sospesi: tutti</option>${
+        ['Con sospesi', 'Senza sospesi'].map(o => `<option ${o === val ? 'selected' : ''}>${o}</option>`).join('')}</select></th>`;
     if (c.f === 'testo')
       return `<th><input type="search" data-k="${c.k}" placeholder="${c.t}…" value="${esc(val)}" class="${val ? 'attivo' : ''}"></th>`;
     return `<th><select data-k="${c.k}" class="${val ? 'attivo' : ''}"><option value="">${c.t}: tutti</option>${
@@ -915,17 +1054,22 @@ function renderUtenti() {
 }
 
 function passaFiltri(u) {
+  const g = filtriUtenti.disp_g, f = filtriUtenti.disp_f;
+  if (g && f && !fasceDi(u, g).includes(f)) return false;
+  if (g && !f && !fasceDi(u, g).length) return false;
+  if (f && !g && !GIORNI.some(d => fasceDi(u, d).includes(f))) return false;
   return COL_UTENTI.every(c => {
     const f = filtriUtenti[c.k];
     if (!f) return true;
+    if (c.k === 'sospesi') return f === 'Con sospesi' ? sospesiDi(u).tot > 0 : sospesiDi(u).tot === 0;
     if (c.k === 'ruolo') return u.ruolo === f || (f !== 'DX e SX' && u.ruolo === 'DX e SX');   // chi gioca da entrambi i lati compare sia in DX sia in SX
-    if (c.k === 'disp') return (u.giorni || []).includes(f) || (u.fasce || []).includes(f);
     if (c.f === 'scelta') return c.v(u) === f;
     return (c.v(u) || '').toLowerCase().includes(f.toLowerCase());
   });
 }
 
 function renderCorpoUtenti() {
+  calcolaSospesi();
   const col = COL_UTENTI.find(c => c.k === ordUtenti.k);
   const chiave = col.ord || (u => (col.v(u) || '').toLowerCase());
   const elenco = db.utenti.filter(passaFiltri).sort((a, b) => {
@@ -945,9 +1089,10 @@ function renderCorpoUtenti() {
       <td>${esc(u.ruolo || '')}</td>
       <td class="disp">${esc(testoDisp(u))}</td>
       <td>${u.livelloId && nomeLivello(u.livelloId) ? `<span class="badge">${esc(nomeLivello(u.livelloId))}</span>` : ''}</td>
+      <td>${sospesiDi(u).n ? `<span class="badge sosp" title="${sospesiDi(u).n} ${sospesiDi(u).n === 1 ? 'quota' : 'quote'} in sospeso">${eur(sospesiDi(u).tot)}</span>` : ''}</td>
       <td class="az"><button type="button" class="small" onclick="apriUtente('${u.id}')">Modifica</button></td>
     </tr>`).join('')
-    : `<tr><td colspan="8" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
+    : `<tr><td colspan="9" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
 }
 
 function ordinaUtenti(k) {
@@ -959,8 +1104,19 @@ $('btnAzzeraFiltri').addEventListener('click', () => { filtriUtenti = {}; render
 // ---- scheda utente ----
 let utenteId = null;
 $('utRuolo').innerHTML = '<option value="">—</option>' + RUOLI.map(r => `<option>${r}</option>`).join('');
-$('utGiorni').innerHTML = GIORNI.map(g => `<label class="chip"><input type="checkbox" value="${g}"><span>${g}</span></label>`).join('');
-$('utFasce').innerHTML = FASCE.map(f => `<label class="chip"><input type="checkbox" value="${f}"><span>${f}</span></label>`).join('');
+$('utDisp').innerHTML = `<thead><tr><th></th>${FASCE.map(f =>
+    `<th><button type="button" data-col="${f}"><span class="lungo">${f}</span><span class="corto">${FASCE_CORTE[f]}</span></button></th>`).join('')}</tr></thead>
+  <tbody>${GIORNI.map(g => `<tr><th><button type="button" data-riga="${g}">${g}</button></th>${FASCE.map(f =>
+    `<td><label class="cella" title="${g} ${f}"><input type="checkbox" data-g="${g}" data-f="${f}"><span>✓</span></label></td>`).join('')}</tr>`).join('')}</tbody>`;
+// tocco su giorno o fascia: seleziona/deseleziona tutta la riga o la colonna
+$('utDisp').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  const sel = b.dataset.riga ? `input[data-g="${b.dataset.riga}"]` : `input[data-f="${b.dataset.col}"]`;
+  const caselle = [...$('utDisp').querySelectorAll(sel)];
+  const tutte = caselle.every(c => c.checked);
+  caselle.forEach(c => c.checked = !tutte);
+});
 
 function apriUtente(id) {
   const u = id ? db.utenti.find(x => x.id === id) : null;
@@ -975,9 +1131,9 @@ function apriUtente(id) {
   $('utEmail').value = u ? (u.email || '') : '';
   $('utRuolo').value = u ? (u.ruolo || '') : '';
   $('utLivello').value = u ? (u.livelloId || '') : '';
-  $('utGiorni').querySelectorAll('input').forEach(c => c.checked = !!u && (u.giorni || []).includes(c.value));
-  $('utFasce').querySelectorAll('input').forEach(c => c.checked = !!u && (u.fasce || []).includes(c.value));
+  $('utDisp').querySelectorAll('input').forEach(c => c.checked = !!u && fasceDi(u, c.dataset.g).includes(c.dataset.f));
   $('btnEliminaUtente').hidden = !u;
+  $('utStorico').innerHTML = u ? htmlStorico(u) : '';
   $('errUtente').textContent = '';
   $('dlgUtente').showModal();
   $('utNome').focus();
@@ -1002,13 +1158,174 @@ $('frmUtente').addEventListener('submit', e => {
     id: utenteId || nuovoId(), nome, cognome,
     telefono: $('utTel').value.trim(), email,
     ruolo: $('utRuolo').value, livelloId: $('utLivello').value,
-    giorni: [...$('utGiorni').querySelectorAll('input:checked')].map(c => c.value),
-    fasce: [...$('utFasce').querySelectorAll('input:checked')].map(c => c.value),
+    disp: Object.fromEntries(GIORNI.map(g => [g, [...$('utDisp').querySelectorAll(`input[data-g="${g}"]:checked`)].map(c => c.dataset.f)])
+                                   .filter(([, f]) => f.length)),
   };
   if (utenteId) db.utenti = db.utenti.map(x => x.id === utenteId ? rec : x);
   else db.utenti.push(rec);
   salvaDb(); $('dlgUtente').close(); renderUtenti();
 });
+
+// ================= COLLEGAMENTO UTENTI ↔ PRIMA NOTA =================
+const nomeUtente = u => `${u.nome} ${u.cognome}`;
+// restituisce l'id dell'utente che corrisponde al nome scritto ("Nome Cognome" o "Cognome Nome")
+function utenteDaNome(nome, idPreferito) {
+  const n = (nome || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  if (!n) return '';
+  const corrisp = u => [u.nome + ' ' + u.cognome, u.cognome + ' ' + u.nome].some(x => x.replace(/\s+/g, ' ').trim().toLowerCase() === n);
+  const pref = db.utenti.find(u => u.id === idPreferito);
+  if (pref && corrisp(pref)) return pref.id;
+  const m = db.utenti.find(corrisp);
+  return m ? m.id : '';
+}
+
+// ---- tendina suggerimenti mentre si scrive il nome di un giocatore ----
+const sugg = document.createElement('div');
+sugg.id = 'suggerimenti'; sugg.hidden = true;
+let suggEl = null, suggLista = [], suggIdx = 0;
+const testoCampo = el => el.isContentEditable ? el.textContent : el.value;
+
+function mostraSugg(el) {
+  const q = testoCampo(el).replace(/\s+/g, ' ').trim().toLowerCase();
+  if (!q) return nascondiSugg();
+  suggLista = db.utenti.filter(u => [u.nome + ' ' + u.cognome, u.cognome + ' ' + u.nome].some(x => x.toLowerCase().includes(q)))
+    .sort((a, b) => a.cognome.localeCompare(b.cognome, 'it') || a.nome.localeCompare(b.nome, 'it')).slice(0, 6);
+  if (!suggLista.length || (suggLista.length === 1 && utenteDaNome(q) === suggLista[0].id)) return nascondiSugg();
+  suggEl = el; suggIdx = 0;
+  (el.closest('dialog') || document.body).appendChild(sugg);
+  sugg.innerHTML = suggLista.map((u, i) => `<div class="s-item ${i === 0 ? 'sel' : ''}" data-i="${i}">
+      <b>${esc(nomeUtente(u))}</b><span>${esc([u.ruolo, nomeLivello(u.livelloId)].filter(Boolean).join(' · '))}</span></div>`).join('');
+  sugg.hidden = false;
+  const r = el.getBoundingClientRect();
+  sugg.style.minWidth = Math.max(r.width, 220) + 'px';
+  sugg.style.left = Math.max(8, Math.min(r.left, innerWidth - sugg.offsetWidth - 8)) + 'px';
+  const sotto = r.bottom + 4, h = sugg.offsetHeight;
+  sugg.style.top = (sotto + h > innerHeight && r.top - h - 4 > 0 ? r.top - h - 4 : sotto) + 'px';
+}
+function nascondiSugg() { sugg.hidden = true; suggEl = null; }
+function scegliSugg(i) {
+  const u = suggLista[i], el = suggEl;
+  if (!u || !el) return;
+  if (el.isContentEditable) el.textContent = nomeUtente(u); else el.value = nomeUtente(u);
+  el.dataset.utente = u.id;
+  el.classList.add('collegato');
+  nascondiSugg();
+  if (el.isContentEditable) el.blur();   // salva subito il nome nella colonna
+}
+document.addEventListener('input', e => {
+  if (!e.target.matches || !e.target.matches('[data-sugg]')) return;
+  e.target.dataset.utente = '';
+  e.target.classList.remove('collegato');
+  mostraSugg(e.target);
+});
+// tastiera: frecce per scegliere, Invio per confermare, Esc per chiudere
+document.addEventListener('keydown', e => {
+  if (sugg.hidden || e.target !== suggEl) return;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    suggIdx = (suggIdx + (e.key === 'ArrowDown' ? 1 : -1) + suggLista.length) % suggLista.length;
+    sugg.querySelectorAll('.s-item').forEach((d, i) => d.classList.toggle('sel', i === suggIdx));
+  } else if (e.key === 'Enter') scegliSugg(suggIdx);
+  else if (e.key === 'Escape') nascondiSugg();
+  else return;
+  e.preventDefault(); e.stopImmediatePropagation();
+}, true);
+sugg.addEventListener('pointerdown', e => {
+  e.preventDefault();   // non far perdere il fuoco al campo
+  const it = e.target.closest('.s-item');
+  if (it) scegliSugg(+it.dataset.i);
+});
+document.addEventListener('focusout', e => { if (e.target === suggEl) setTimeout(() => { if (document.activeElement !== suggEl) nascondiSugg(); }, 150); });
+window.addEventListener('scroll', () => { if (!sugg.hidden) nascondiSugg(); }, true);
+
+// ---- storico dell'utente (partite e quote in sospeso) ----
+function htmlStorico(u) {
+  const righe = [];
+  db.prenotazioni.forEach(p => p.quote.forEach((q, i) => {
+    if (q.utenteId === u.id || (!q.utenteId && utenteDaNome(q.nome) === u.id)) righe.push({ p, q, i });
+  }));
+  righe.sort((a, b) => (b.p.data + b.p.dalle).localeCompare(a.p.data + a.p.dalle));
+  const pagato = righe.reduce((s, { q }) => s + ((q.metodo === 'Sospeso' ? !!q.saldo : q.pagato && !GRATUITI.includes(q.metodo)) ? q.importo : 0), 0);
+  const sospesi = righe.filter(({ q }) => q.metodo === 'Sospeso' && !q.saldo);
+  const totSosp = sospesi.reduce((s, { q }) => s + q.importo, 0);
+  const riga = ({ p, q }) => `<li><span>${dataIt(p.data)} · Campo ${p.campo} · ${p.dalle}–${p.alle} · ${esc(p.nome || '')}</span>
+      <span class="imp">${GRATUITI.includes(q.metodo) ? q.metodo : eur(q.importo) + ' ' + (q.metodo === 'Sospeso' ? (q.saldo ? 'saldata' : 'in sospeso') : q.pagato ? q.metodo : 'da pagare')}</span></li>`;
+  return `<div class="storico">
+    <h3>Storico</h3>
+    <div class="stat">
+      <div><b>${righe.length}</b><span>Partite</span></div>
+      <div><b>${righe.length ? dataIt(righe[0].p.data) : '—'}</b><span>Ultima partita</span></div>
+      <div><b>${eur(pagato)}</b><span>Pagato</span></div>
+      <div><b style="color:#8e44ad">${eur(totSosp)}</b><span>In sospeso</span></div>
+    </div>
+    ${sospesi.length ? `<h3>Quote in sospeso</h3><ul class="sosp">${sospesi.map(riga).join('')}</ul>` : ''}
+    ${righe.length ? `<h3>Ultime partite${righe.length > 10 ? ' (10 di ' + righe.length + ')' : ''}</h3><ul>${righe.slice(0, 10).map(riga).join('')}</ul>`
+                   : '<div class="nessuno">Nessuna partita registrata in prima nota.</div>'}
+  </div>`;
+}
+
+// ================= ANNOTAZIONI =================
+let notaId = null;
+function renderNote() {
+  if (!$('notaData').value) $('notaData').value = oggi();
+  if (!$('notaStaff').value && !notaId) $('notaStaff').value = db.ultimoStaff || '';
+  const staff = [...new Set(db.annotazioni.map(n => n.staff))].sort((a, b) => a.localeCompare(b, 'it'));
+  $('elencoStaff').innerHTML = staff.map(s => `<option value="${esc(s)}">`).join('');
+  const fs = $('filtroStaff').value;
+  $('filtroStaff').innerHTML = '<option value="">Staff: tutti</option>' + staff.map(s => `<option ${s === fs ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  const cerca = $('cercaNote').value.trim().toLowerCase();
+  const elenco = db.annotazioni
+    .filter(n => (!fs || n.staff === fs) && (!cerca || n.testo.toLowerCase().includes(cerca) || n.staff.toLowerCase().includes(cerca)))
+    .sort((a, b) => b.data.localeCompare(a.data) || (b.creato || 0) - (a.creato || 0));
+  const tot = db.annotazioni.length;
+  $('contaNote').textContent = tot ? (elenco.length === tot ? `(${tot})` : `(${elenco.length} di ${tot})`) : '';
+  $('listaNote').innerHTML = elenco.length ? elenco.map(n => `<div class="nota-card">
+      <div class="testa">
+        <div><span class="quando">${new Date(n.data + 'T12:00').toLocaleDateString('it-IT', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+             <span class="chi">· ${esc(n.staff)}</span></div>
+        <div class="azioni"><button type="button" class="small" onclick="modificaNota('${n.id}')">Modifica</button>
+             <button type="button" class="small danger" onclick="eliminaNota('${n.id}')">✕</button></div>
+      </div>
+      <div class="testo">${esc(n.testo)}</div>
+    </div>`).join('')
+    : `<div class="vuoto">${tot ? 'Nessuna nota corrisponde alla ricerca' : 'Nessuna annotazione'}</div>`;
+}
+function fineModificaNota() {
+  notaId = null;
+  $('frmNota').classList.remove('in-modifica');
+  $('btnAnnullaNota').hidden = true;
+  $('btnSalvaNota').textContent = 'Salva nota';
+  $('notaTesto').value = ''; $('notaData').value = oggi(); $('notaStaff').value = db.ultimoStaff || '';
+  $('errNota').textContent = '';
+}
+$('frmNota').addEventListener('submit', e => {
+  e.preventDefault();
+  const data = $('notaData').value, staff = $('notaStaff').value.replace(/\s+/g, ' ').trim(), testo = $('notaTesto').value.trim();
+  if (!data || !staff || !testo) return $('errNota').textContent = 'Compila data, staff e nota.';
+  if (notaId) Object.assign(db.annotazioni.find(n => n.id === notaId), { data, staff, testo });
+  else db.annotazioni.push({ id: nuovoId(), data, staff, testo, creato: Date.now() });
+  db.ultimoStaff = staff;
+  salvaDb(); fineModificaNota(); renderNote();
+});
+function modificaNota(id) {
+  const n = db.annotazioni.find(x => x.id === id);
+  notaId = id;
+  $('notaData').value = n.data; $('notaStaff').value = n.staff; $('notaTesto').value = n.testo;
+  $('frmNota').classList.add('in-modifica');
+  $('btnAnnullaNota').hidden = false;
+  $('btnSalvaNota').textContent = 'Salva modifiche';
+  $('frmNota').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('notaTesto').focus();
+}
+function eliminaNota(id) {
+  const n = db.annotazioni.find(x => x.id === id);
+  if (!confirm(`Eliminare la nota di ${n.staff} del ${dataIt(n.data)}?`)) return;
+  db.annotazioni = db.annotazioni.filter(x => x.id !== id);
+  if (notaId === id) fineModificaNota();
+  salvaDb(); renderNote();
+}
+$('btnAnnullaNota').addEventListener('click', fineModificaNota);
+$('cercaNote').addEventListener('input', renderNote);
+$('filtroStaff').addEventListener('change', renderNote);
 
 // ---- menu pagine ----
 const PAGINE = { 'prima-nota': 'Prima nota', 'utenti': 'Utenti', 'annotazioni': 'Annotazioni', 'livelli': 'Livelli' };
@@ -1020,6 +1337,7 @@ function mostraPagina() {
   else $('sottotitolo').textContent = PAGINE[pag];
   if (pag === 'utenti') renderUtenti();
   if (pag === 'livelli') renderLivelli();
+  if (pag === 'annotazioni') renderNote();
   document.title = PAGINE[pag] + ' · ' + db.nomeCircolo;
   scrollTo(0, 0);
 }
