@@ -167,6 +167,21 @@
   .t-utenti td.nome { font-weight: 600; }
   .t-utenti a { color: inherit; }
   .t-utenti td.az { white-space: nowrap; text-align: right; }
+  .t-utenti td.c-cognome { white-space: nowrap; }
+  .btn-scheda { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; min-height: 0;
+                margin-right: 8px; padding: 0; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent);
+                background: #fff; vertical-align: middle; }
+  .btn-scheda:hover { background: var(--accent); color: #fff; }
+  .scheda-info { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; font-size: 14px; }
+  .scheda-info dt { color: var(--muted); font-size: 12px; align-self: center; }
+  .scheda-info dd { margin: 0; font-weight: 600; }
+  .scheda-info a { color: var(--accent); }
+  .griglia-vista { border-collapse: separate; border-spacing: 3px; font-size: 12px; margin-left: -3px; }
+  .griglia-vista th { color: var(--muted); font-weight: 600; padding: 0 4px; }
+  .griglia-vista tbody th { text-align: left; color: var(--text); }
+  .griglia-vista td { width: 64px; height: 24px; border-radius: 5px; background: var(--bg); text-align: center; }
+  .griglia-vista .corto { display: none; }
+  .griglia-vista td.si { background: var(--accent); color: #fff; font-weight: 700; }
   .badge.mista { background: var(--accent-soft); color: var(--accent); }
   .t-utenti td.c-sesso { font-weight: 600; text-align: center; }
   .chip-riga { align-self: flex-start; }
@@ -358,6 +373,14 @@
   }
 
   @media (max-width: 640px) {
+    .scheda-wrap { display: flex; flex-direction: column; min-height: 100%; }
+    .scheda-wrap .dlg-b { flex: 1; }
+    .griglia-vista td { width: auto; }
+    .griglia-vista .lungo { display: none; }
+    .griglia-vista .corto { display: inline; }
+    .griglia-vista { width: calc(100% + 6px); table-layout: fixed; }
+    .griglia-vista thead th:first-child { width: 36px; }
+    .btn-scheda { width: 34px; height: 34px; }
     #frmCassa { display: flex; flex-direction: column; min-height: 100%; }
     #frmCassa .dlg-b { flex: 1; }
     .varia { grid-template-columns: 22px 1fr 80px 30px; }
@@ -577,6 +600,21 @@
       <button type="submit" class="primary" id="btnSalva">Salva</button>
     </div>
   </form>
+</dialog>
+
+<dialog id="dlgScheda">
+  <div class="scheda-wrap">
+    <div class="dlg-h" id="schedaTitolo"></div>
+    <div class="dlg-b">
+      <div class="scheda-info" id="schedaInfo"></div>
+      <div id="schedaDisp"></div>
+      <div id="schedaStorico"></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" id="btnChiudiScheda" style="margin-right:auto">Chiudi</button>
+      <button type="button" class="primary" id="btnModificaScheda">Modifica</button>
+    </div>
+  </div>
 </dialog>
 
 <dialog id="dlgCassa">
@@ -1374,7 +1412,6 @@ const COL_UTENTI = [
   { k: 'nome',     t: 'Nome',          f: 'testo',  v: u => u.nome },
   { k: 'sesso',    t: 'Sesso',         f: 'scelta', v: u => u.sesso || '', opz: () => ['M', 'F'] },
   { k: 'telefono', t: 'Telefono',      f: 'testo',  v: u => u.telefono },
-  { k: 'email',    t: 'Email',         f: 'testo',  v: u => u.email },
   { k: 'ruolo',    t: 'Ruolo',         f: 'scelta', v: u => u.ruolo, opz: () => RUOLI },
   { k: 'disp',     t: 'Disponibilità', f: 'disp',   v: testoDisp },
   { k: 'mista',    t: 'Mista',         f: 'scelta', v: u => u.mista ? 'Sì' : 'No', opz: () => ['Sì', 'No'] },
@@ -1457,11 +1494,10 @@ function renderCorpoUtenti() {
   const tot = db.utenti.length;
   $('contaUtenti').textContent = elenco.length === tot ? `(${tot})` : `(${elenco.length} di ${tot})`;
   $('corpoUtenti').innerHTML = elenco.length ? elenco.map(u => `<tr>
-      <td class="nome c-cognome">${esc(u.cognome || '')}</td>
+      <td class="nome c-cognome"><button type="button" class="btn-scheda" title="Vedi la scheda di ${esc(u.nome + ' ' + u.cognome)}" aria-label="Vedi la scheda" onclick="apriScheda('${u.id}')"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>${esc(u.cognome || '')}</td>
       <td class="nome c-nome">${esc(u.nome || '')}</td>
       <td class="c-sesso">${esc(u.sesso || '')}</td>
       <td class="c-tel">${u.telefono ? `<a href="tel:${esc(u.telefono.replace(/\s/g, ''))}">${esc(u.telefono)}</a>` : ''}</td>
-      <td class="c-email">${u.email ? `<a href="mailto:${esc(u.email)}">${esc(u.email)}</a>` : ''}</td>
       <td class="c-ruolo">${esc(u.ruolo || '')}</td>
       <td class="disp c-disp">${esc(testoDisp(u))}</td>
       <td class="c-mista">${u.mista ? '<span class="badge mista">Sì</span>' : ''}</td>
@@ -1469,7 +1505,7 @@ function renderCorpoUtenti() {
       <td class="c-sospesi">${sospesiDi(u).n ? `<span class="badge sosp" title="${sospesiDi(u).n} ${sospesiDi(u).n === 1 ? 'sospeso' : 'sospesi'}">${eur(sospesiDi(u).tot)}</span>` : ''}</td>
       <td class="az"><button type="button" class="small" onclick="apriUtente('${u.id}')">Modifica</button></td>
     </tr>`).join('')
-    : `<tr><td colspan="11" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
+    : `<tr><td colspan="10" class="vuoto">${tot ? 'Nessun utente corrisponde ai filtri' : 'Nessun utente registrato'}</td></tr>`;
 }
 
 function ordinaUtenti(k) {
@@ -1618,10 +1654,37 @@ sugg.addEventListener('pointerdown', e => {
 document.addEventListener('focusout', e => { if (e.target === suggEl) setTimeout(() => { if (document.activeElement !== suggEl) nascondiSugg(); }, 150); });
 window.addEventListener('scroll', () => { if (!sugg.hidden) nascondiSugg(); }, true);
 
+// ---- scheda utente in sola lettura ----
+function apriScheda(id) {
+  const u = db.utenti.find(x => x.id === id);
+  if (!u) return;
+  utenteId = id;   // serve ai pulsanti dello storico (aggiungi/incassa sospeso)
+  $('schedaTitolo').textContent = `${u.nome} ${u.cognome}`;
+  const riga = (t, v) => `<dt>${t}</dt><dd>${v || '<span style="color:var(--muted);font-weight:400">—</span>'}</dd>`;
+  $('schedaInfo').innerHTML = `<dl class="scheda-info" style="margin:0">
+    ${riga('Sesso', esc(u.sesso || ''))}
+    ${riga('Telefono', u.telefono ? `<a href="tel:${esc(u.telefono.replace(/\s/g, ''))}">${esc(u.telefono)}</a>` : '')}
+    ${riga('Email', u.email ? `<a href="mailto:${esc(u.email)}">${esc(u.email)}</a>` : '')}
+    ${riga('Ruolo', esc(u.ruolo || ''))}
+    ${riga('Livello', nomeLivello(u.livelloId) ? `<span class="badge">${esc(nomeLivello(u.livelloId))}</span>` : '')}
+    ${riga('Partita mista', u.mista ? '<span class="badge mista">Sì</span>' : 'No')}
+  </dl>`;
+  const haDisp = GIORNI.some(g => fasceDi(u, g).length);
+  $('schedaDisp').innerHTML = `<div class="etichetta-sez" style="margin-bottom:4px">Disponibilità</div>` + (haDisp
+    ? `<table class="griglia-vista"><thead><tr><th></th>${FASCE.map(f => `<th><span class="lungo">${f}</span><span class="corto">${FASCE_CORTE[f]}</span></th>`).join('')}</tr></thead>
+       <tbody>${GIORNI.map(g => `<tr><th>${g}</th>${FASCE.map(f => fasceDi(u, g).includes(f) ? '<td class="si">✓</td>' : '<td></td>').join('')}</tr>`).join('')}</tbody></table>`
+    : '<div class="nessuno" style="color:var(--muted);font-style:italic;font-size:13px">Non indicata</div>');
+  $('schedaStorico').innerHTML = htmlStorico(u);
+  $('dlgScheda').showModal();
+}
+$('btnChiudiScheda').addEventListener('click', () => $('dlgScheda').close());
+$('btnModificaScheda').addEventListener('click', () => { const id = utenteId; $('dlgScheda').close(); apriUtente(id); });
+
 // ---- storico dell'utente (partite e quote in sospeso) ----
 function aggiornaStorico() {
   const u = db.utenti.find(x => x.id === utenteId);
   if (u && $('dlgUtente').open) $('utStorico').innerHTML = htmlStorico(u);
+  if (u && $('dlgScheda').open) $('schedaStorico').innerHTML = htmlStorico(u);
   if (!$('pg-utenti').hidden) renderCorpoUtenti();
 }
 function htmlStorico(u) {
