@@ -55,6 +55,26 @@
   .movimento.sospesi td select { padding: 4px 6px; }
   .nomeq { display: inline-block; min-width: 90px; padding: 1px 4px; margin-left: -4px; border-radius: 4px; outline: none; cursor: text; }
   .nomeq:hover { background: #eef1f4; }
+  .nomeq.pagabile { cursor: pointer; }
+  .nomeq.pagabile:hover { background: var(--accent-soft); }
+  .cassa-partita { font-size: 13px; color: var(--muted); margin-top: -4px; }
+  .etichetta-sez { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+  .voci { display: flex; flex-direction: column; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .voce { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid #eef1f4; cursor: pointer; }
+  .voce:first-child { border-top: none; }
+  .voce.info { cursor: default; color: var(--muted); font-style: italic; }
+  .voce .d { flex: 1; }
+  .voce .d small { display: block; color: var(--muted); font-size: 11.5px; }
+  .voce .imp { font-weight: 700; white-space: nowrap; }
+  .voce.sosp .imp { color: #8e44ad; }
+  .voce input[type=checkbox] { width: 20px; height: 20px; flex: none; }
+  .varia { display: grid; grid-template-columns: 22px 1fr 140px 90px 30px; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .varia input[type=checkbox] { width: 20px; height: 20px; }
+  .varia input, .varia select { min-width: 0; width: 100%; }
+  .cassa-fondo { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .cassa-fondo label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  .cassa-tot { text-align: right; font-size: 12px; color: var(--muted); }
+  .cassa-tot b { display: block; font-size: 22px; color: var(--text); }
   .nomeq:focus { background: #fff; box-shadow: 0 0 0 2px var(--accent); }
   .nomeq:empty::before { content: attr(data-ph); color: var(--muted); }
   .totali .v { font-size: 18px; font-weight: 700; white-space: nowrap; }
@@ -72,6 +92,7 @@
   .pren { border-width: 2px; }
   .pren.completa { border-color: #27ae60; }
   .pren.incompleta { border-color: var(--danger); background: #fdf2f1; }
+  .nomeq.debitore { color: var(--danger); font-weight: 700; text-decoration-color: var(--danger); }
   .pren .ora { font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; align-items: center; }
   .pren .azioni { display: flex; gap: 4px; }
   .pren table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
@@ -334,6 +355,11 @@
   }
 
   @media (max-width: 640px) {
+    #frmCassa { display: flex; flex-direction: column; min-height: 100%; }
+    #frmCassa .dlg-b { flex: 1; }
+    .varia { grid-template-columns: 22px 1fr 80px 30px; }
+    .varia select { grid-column: 2 / 4; grid-row: 2; }
+    #frmCassa .dlg-f { flex-wrap: wrap; }
     #frmSospeso { display: flex; flex-direction: column; min-height: 100%; }
     #frmSospeso .dlg-b { flex: 1; }
     #frmSospeso .row { flex-wrap: wrap; }
@@ -541,6 +567,33 @@
     <div class="dlg-f">
       <button type="button" id="btnAnnulla">Annulla</button>
       <button type="submit" class="primary" id="btnSalva">Salva</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgCassa">
+  <form method="dialog" id="frmCassa">
+    <div class="dlg-h" id="cassaTitolo">Pagamento</div>
+    <div class="dlg-b">
+      <div class="cassa-partita" id="cassaPartita"></div>
+      <div class="row">
+        <label>Giocatore <input type="text" id="cassaNome" autocomplete="off" data-sugg></label>
+      </div>
+      <div class="etichetta-sez">Da pagare</div>
+      <div class="voci" id="cassaVoci"></div>
+      <div class="etichetta-sez">Varie <span class="aiuto-mini">— palline, bevande, noleggi, quota associativa…</span></div>
+      <div id="cassaVarie"></div>
+      <button type="button" class="small" id="btnAddVaria" style="align-self:flex-start">+ Aggiungi voce</button>
+      <div class="cassa-fondo">
+        <label>Metodo <select id="cassaMetodo"><option>Contanti</option><option>POS</option><option>App</option></select></label>
+        <div class="cassa-tot">Totale selezionato <b id="cassaTot">€ 0,00</b></div>
+      </div>
+      <div class="err" id="errCassa"></div>
+    </div>
+    <div class="dlg-f">
+      <button type="button" id="btnChiudiCassa" style="margin-right:auto">Chiudi</button>
+      <button type="button" id="btnSospendiCassa">Metti in sospeso</button>
+      <button type="submit" class="primary" id="btnIncassa">Incassa</button>
     </div>
   </form>
 </dialog>
@@ -819,6 +872,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 // ---- render ----
 function render() {
+  calcolaSospesi();
   if ($('dataLabel')) $('dataLabel').textContent = new Date(dataSel + 'T12:00').toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   const delGiorno = db.prenotazioni.filter(p => p.data === dataSel);
   let contanti = 0, pos = 0, app = 0, daInc = 0, gratuite = 0;
@@ -830,6 +884,8 @@ function render() {
       let totP = 0, incompleta = false;
       const righe = p.quote.map((q, i) => {
         const gratuita = GRATUITI.includes(q.metodo), sospeso = q.metodo === 'Sospeso';
+        const uid = q.utenteId || utenteDaNome(q.nome);
+        const deb = uid ? sospesiDi({ id: uid }) : { n: 0 };
         if (gratuita) gratuite++;
         else if (sospeso) { /* il sospeso è una scelta fatta: la quota è registrata */ }
         else if (q.pagato) {
@@ -837,8 +893,8 @@ function render() {
           if (q.metodo === 'POS') pos += q.importo; else if (q.metodo === 'App') app += q.importo; else contanti += q.importo;
         } else { incompleta = true; daInc += q.importo; }
         return `<tr>
-          <td><span class="nomeq ${q.nome ? '' : 'vuota'} ${utenteDaNome(q.nome, q.utenteId) ? 'collegato' : ''}" contenteditable="true" spellcheck="false" data-sugg
-                data-utente="${q.utenteId || ''}" data-id="${p.id}" data-i="${i}" data-ph="Quota ${i + 1}" title="Clicca per scrivere il nome del giocatore">${esc(q.nome || '')}</span></td>
+          <td><span class="nomeq ${q.nome ? '' : 'vuota'} ${utenteDaNome(q.nome, q.utenteId) ? 'collegato' : ''} ${deb.n ? 'debitore' : ''} ${q.nome ? 'pagabile' : ''}" contenteditable="${q.nome ? 'false' : 'true'}" spellcheck="false" data-sugg
+                data-utente="${q.utenteId || ''}" data-id="${p.id}" data-i="${i}" data-ph="Quota ${i + 1}" title="${q.nome ? `Clicca per i pagamenti di ${esc(q.nome)}${deb.n ? ` — ha ${deb.n} ${deb.n === 1 ? 'sospeso aperto' : 'sospesi aperti'} per ${eur(deb.tot)}` : ''}` : 'Clicca per scrivere il nome del giocatore'}">${esc(q.nome || '')}</span></td>
           <td class="met">${q.metodo}</td>
           <td class="imp ${gratuita ? 'gratuita' : sospeso ? (q.saldo ? 'saldata' : 'sospesa') : q.pagato ? '' : 'nonpag'}"
               title="${sospeso && q.saldo ? `Saldata il ${dataIt(q.saldo.data)} (${q.saldo.metodo})` : ''}">${gratuita ? q.metodo : eur(q.importo)}${sospeso && q.saldo ? ' ✓' : ''}</td>
@@ -931,14 +987,164 @@ function saldaSospeso(id, i) {
   const p = db.prenotazioni.find(x => x.id === id), q = p.quote[i];
   const metodo = $(`sm_${id}_${i}`).value;
   if (!confirm(`Incassare ${eur(q.importo)} da ${q.nome || 'Quota ' + (i + 1)} (${p.nome || ''} del ${dataIt(p.data)}) con ${metodo}, nella prima nota del ${dataIt(dataSel)}?`)) return;
+  registraSaldoQuota(id, i, metodo);
+  salvaDb(); render();
+}
+function registraSaldoQuota(id, i, metodo) {
+  const p = db.prenotazioni.find(x => x.id === id), q = p.quote[i];
   const ent = { id: nuovoId(), data: dataSel,
     ora: new Date().toTimeString().slice(0, 5),
     descrizione: `Saldo sospeso ${q.nome || 'Quota ' + (i + 1)} · ${p.nome || ''} Campo ${p.campo} del ${dataIt(p.data)}`,
     categoria: 'Quote in sospeso', importo: q.importo, metodo, quotaRef: { id, i } };
   db.entrate.push(ent);
   q.saldo = { data: dataSel, metodo, entrataId: ent.id };
-  salvaDb(); render();
 }
+
+// ================= FINESTRA PAGAMENTO DEL GIOCATORE =================
+let cassa = null;   // { pid, i } quota da cui è stata aperta
+const METODI_CASSA = ['Contanti', 'POS', 'App'];
+const normNome = n => (n || '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+document.addEventListener('click', e => {
+  const el = e.target.closest && e.target.closest('.nomeq.pagabile');
+  if (el) apriCassa(el.dataset.id, +el.dataset.i);
+});
+
+function apriCassa(pid, i) {
+  const p = db.prenotazioni.find(x => x.id === pid), q = p.quote[i];
+  cassa = { pid, i };
+  $('cassaNome').value = q.nome;
+  $('cassaNome').dataset.utente = q.utenteId || '';
+  $('cassaNome').classList.toggle('collegato', !!utenteDaNome(q.nome, q.utenteId));
+  $('cassaVarie').innerHTML = '';
+  $('errCassa').textContent = '';
+  $('cassaMetodo').value = METODI_CASSA.includes(q.metodo) ? q.metodo : 'Contanti';
+  disegnaCassa();
+  $('dlgCassa').showModal();
+  $('btnIncassa').focus();
+}
+
+// voci pagabili: la quota di questa partita + tutti i sospesi aperti del giocatore
+function vociCassa() {
+  const p = db.prenotazioni.find(x => x.id === cassa.pid), q = p.quote[cassa.i];
+  const voci = [];
+  const gratuita = GRATUITI.includes(q.metodo);
+  if (gratuita) voci.push({ info: `Quota di questa partita: ${q.metodo} (gratuita)` });
+  else if (q.metodo !== 'Sospeso' && q.pagato) voci.push({ info: `Quota di questa partita già pagata (${q.metodo}) — ${eur(q.importo)}` });
+  else if (q.metodo !== 'Sospeso') voci.push({ k: 'q', d: 'Quota di questa partita', sub: `${p.nome || ''} · Campo ${p.campo} · ${p.dalle}–${p.alle}`, imp: q.importo, sel: true });
+  const uid = utenteDaNome(q.nome, q.utenteId);
+  tuttiSospesi().forEach(r => {
+    if (uid ? r.uid !== uid : normNome(r.nome) !== normNome(q.nome)) return;
+    if (r.tipo === 'quota') {
+      const questa = r.p.id === cassa.pid && r.i === cassa.i;
+      voci.push({ k: `sq:${r.p.id}:${r.i}`, sosp: true, sel: questa,
+        d: questa ? 'Quota di questa partita (in sospeso)' : `Sospeso: partita ${r.p.nome || ''}`,
+        sub: `${dataIt(r.p.data)} · Campo ${r.p.campo} · ${r.p.dalle}–${r.p.alle}`, imp: r.importo });
+    } else {
+      voci.push({ k: `sm:${r.x.id}`, sosp: true, sel: false, d: `Sospeso: ${r.x.descrizione}`,
+        sub: `${dataIt(r.x.data)} · ${r.x.categoria}`, imp: r.importo });
+    }
+  });
+  return voci;
+}
+
+function disegnaCassa() {
+  const p = db.prenotazioni.find(x => x.id === cassa.pid), q = p.quote[cassa.i];
+  $('cassaTitolo').textContent = 'Pagamento — ' + (q.nome || 'Quota ' + (cassa.i + 1));
+  $('cassaPartita').textContent = `${dataIt(p.data)} · Campo ${p.campo} · ${p.dalle}–${p.alle} · ${p.nome || ''}`;
+  const voci = vociCassa();
+  $('cassaVoci').innerHTML = voci.map(v => v.info
+    ? `<div class="voce info">${esc(v.info)}</div>`
+    : `<label class="voce ${v.sosp ? 'sosp' : ''}"><input type="checkbox" data-k="${v.k}" data-imp="${v.imp}" ${v.sel ? 'checked' : ''}>
+         <span class="d">${esc(v.d)}<small>${esc(v.sub)}</small></span><span class="imp">${eur(v.imp)}</span></label>`).join('')
+    || '<div class="voce info">Niente da pagare per questo giocatore</div>';
+  totaleCassa();
+}
+
+function aggiungiVaria() {
+  const div = document.createElement('div');
+  div.className = 'varia';
+  div.innerHTML = `<input type="checkbox" checked title="Includi">
+    <input type="text" placeholder="Descrizione, es. tubo palline" class="v-desc">
+    <select class="v-cat">${MOV.entrate.categorie.map(c => `<option ${c === 'Vendita materiale' ? 'selected' : ''}>${c}</option>`).join('')}</select>
+    <input type="number" min="0.01" step="0.01" placeholder="€" class="v-imp" inputmode="decimal">
+    <button type="button" class="small danger" title="Togli">✕</button>`;
+  div.querySelector('button').addEventListener('click', () => { div.remove(); totaleCassa(); });
+  $('cassaVarie').appendChild(div);
+  div.querySelector('.v-desc').focus();
+}
+$('btnAddVaria').addEventListener('click', aggiungiVaria);
+
+function varieCassa() {
+  return [...$('cassaVarie').querySelectorAll('.varia')].map(d => ({
+    sel: d.querySelector('input[type=checkbox]').checked,
+    descrizione: d.querySelector('.v-desc').value.trim(),
+    categoria: d.querySelector('.v-cat').value,
+    importo: parseFloat(d.querySelector('.v-imp').value) || 0,
+  }));
+}
+function totaleCassa() {
+  const voci = [...$('cassaVoci').querySelectorAll('input:checked')].reduce((s, c) => s + parseFloat(c.dataset.imp), 0);
+  const varie = varieCassa().filter(v => v.sel).reduce((s, v) => s + v.importo, 0);
+  const tot = voci + varie;
+  $('cassaTot').textContent = eur(tot);
+  $('btnIncassa').textContent = tot > 0 ? `Incassa ${eur(tot)}` : 'Incassa';
+  const daSospendere = $('cassaVoci').querySelector('input[data-k="q"]:checked') || varieCassa().some(v => v.sel && v.importo > 0);
+  $('btnSospendiCassa').disabled = !daSospendere;
+}
+$('dlgCassa').addEventListener('input', totaleCassa);
+$('dlgCassa').addEventListener('change', e => { if (e.target !== $('cassaNome')) totaleCassa(); });
+
+// cambio del giocatore su questa quota
+$('cassaNome').addEventListener('change', () => {
+  const p = db.prenotazioni.find(x => x.id === cassa.pid), q = p.quote[cassa.i];
+  const nome = $('cassaNome').value.replace(/\s+/g, ' ').trim();
+  if (!nome) { $('cassaNome').value = q.nome; return; }
+  const uid = utenteDaNome(nome, $('cassaNome').dataset.utente);
+  q.nome = nome;
+  if (uid) q.utenteId = uid; else delete q.utenteId;
+  $('cassaNome').classList.toggle('collegato', !!uid);
+  salvaDb(); disegnaCassa(); render();
+});
+
+function controllaVarie() {
+  const v = varieCassa().filter(x => x.sel);
+  if (v.some(x => !x.descrizione || !(x.importo > 0))) { $('errCassa').textContent = 'Completa descrizione e importo delle voci varie selezionate (o togli la spunta).'; return null; }
+  return v;
+}
+
+$('frmCassa').addEventListener('submit', e => {
+  e.preventDefault();
+  const varie = controllaVarie(); if (!varie) return;
+  const scelte = [...$('cassaVoci').querySelectorAll('input:checked')].map(c => c.dataset.k);
+  if (!scelte.length && !varie.length) return $('errCassa').textContent = 'Seleziona almeno una voce da pagare.';
+  const metodo = $('cassaMetodo').value;
+  const p = db.prenotazioni.find(x => x.id === cassa.pid), q = p.quote[cassa.i];
+  const uid = utenteDaNome(q.nome, q.utenteId);
+  scelte.forEach(k => {
+    const [t, a, b] = k.split(':');
+    if (t === 'q') { q.metodo = metodo; q.pagato = true; }
+    else if (t === 'sq') registraSaldoQuota(a, +b, metodo);
+    else if (t === 'sm') registraSaldoManuale(a, metodo);
+  });
+  varie.forEach(v => db.entrate.push({ id: nuovoId(), data: dataSel, ora: new Date().toTimeString().slice(0, 5),
+    descrizione: `${v.descrizione} · ${q.nome}`, categoria: v.categoria, importo: v.importo, metodo, utenteId: uid || undefined }));
+  salvaDb(); $('dlgCassa').close(); render();
+});
+
+$('btnSospendiCassa').addEventListener('click', () => {
+  const varie = controllaVarie(); if (!varie) return;
+  const p = db.prenotazioni.find(x => x.id === cassa.pid), q = p.quote[cassa.i];
+  const quota = $('cassaVoci').querySelector('input[data-k="q"]:checked');
+  const tot = (quota ? q.importo : 0) + varie.reduce((s, v) => s + v.importo, 0);
+  if (!confirm(`Mettere in sospeso ${eur(tot)} a ${q.nome}?` + (quota ? '\n– quota di questa partita' : '') + varie.map(v => `\n– ${v.descrizione}`).join(''))) return;
+  const uid = utenteDaNome(q.nome, q.utenteId);
+  if (quota) { q.metodo = 'Sospeso'; q.pagato = false; }
+  varie.forEach(v => db.sospesi.push({ id: nuovoId(), data: dataSel, nome: q.nome, utenteId: uid, descrizione: v.descrizione,
+    categoria: v.categoria, importo: v.importo, creato: Date.now() }));
+  salvaDb(); $('dlgCassa').close(); render();
+});
+$('btnChiudiCassa').addEventListener('click', () => $('dlgCassa').close());
 
 // ---- sospesi inseriti a mano ----
 let ssDopo = null;   // cosa aggiornare dopo il salvataggio (es. la scheda utente aperta)
@@ -977,13 +1183,17 @@ function saldaManuale(id, metodoScelto, dopo) {
   const x = db.sospesi.find(s => s.id === id);
   const metodo = metodoScelto || $('sm_s_' + id).value;
   if (!confirm(`Incassare ${eur(x.importo)} da ${x.nome} (${x.descrizione} del ${dataIt(x.data)}) con ${metodo}, nella prima nota del ${dataIt(dataSel)}?`)) return;
+  registraSaldoManuale(id, metodo);
+  salvaDb(); render();
+  if (dopo) dopo();
+}
+function registraSaldoManuale(id, metodo) {
+  const x = db.sospesi.find(s => s.id === id);
   const ent = { id: nuovoId(), data: dataSel, ora: new Date().toTimeString().slice(0, 5),
     descrizione: `Saldo sospeso ${x.nome} · ${x.descrizione} del ${dataIt(x.data)}`,
     categoria: x.categoria, importo: x.importo, metodo, sospesoRef: id };
   db.entrate.push(ent);
   x.saldo = { data: dataSel, metodo, entrataId: ent.id };
-  salvaDb(); render();
-  if (dopo) dopo();
 }
 function eliminaManuale(id, dopo) {
   const x = db.sospesi.find(s => s.id === id);
@@ -1019,6 +1229,7 @@ document.addEventListener('focusout', e => {
   q.nome = nome;
   if (uid) q.utenteId = uid; else delete q.utenteId;
   salvaDb();
+  setTimeout(() => { const a = document.activeElement; if (!a || !a.classList || !a.classList.contains('nomeq')) render(); }, 0);
   renderPos();
 });
 
@@ -1359,6 +1570,7 @@ function scegliSugg(i) {
   el.classList.add('collegato');
   nascondiSugg();
   if (el.isContentEditable) el.blur();   // salva subito il nome nella colonna
+  else el.dispatchEvent(new Event('change', { bubbles: true }));
 }
 document.addEventListener('input', e => {
   if (!e.target.matches || !e.target.matches('[data-sugg]')) return;
@@ -1494,8 +1706,11 @@ $('filtroStaff').addEventListener('change', renderNote);
 
 // ---- menu pagine ----
 const PAGINE = { 'prima-nota': 'Prima nota', 'utenti': 'Utenti', 'annotazioni': 'Annotazioni', 'livelli': 'Livelli' };
-function mostraPagina() {
-  const pag = PAGINE[location.hash.slice(1)] ? location.hash.slice(1) : 'prima-nota';
+let paginaCorrente = 'prima-nota';
+function mostraPagina(scelta) {
+  const daIndirizzo = location.hash.slice(1);
+  const pag = PAGINE[scelta] ? scelta : PAGINE[daIndirizzo] ? daIndirizzo : 'prima-nota';
+  paginaCorrente = pag;
   for (const p in PAGINE) $('pg-' + p).hidden = p !== pag;
   document.querySelectorAll('#menu a').forEach(a => a.classList.toggle('attiva', a.dataset.pagina === pag));
   if (pag === 'prima-nota') { $('sottotitolo').innerHTML = 'Prima nota — <span id="dataLabel"></span>'; render(); }
@@ -1506,7 +1721,15 @@ function mostraPagina() {
   document.title = PAGINE[pag] + ' · ' + db.nomeCircolo;
   scrollTo(0, 0);
 }
-window.addEventListener('hashchange', mostraPagina);
+window.addEventListener('hashchange', () => mostraPagina());
+// il menu cambia pagina direttamente, così funziona anche dove l'indirizzo con # non è disponibile
+document.querySelectorAll('#menu a').forEach(a => a.addEventListener('click', e => {
+  e.preventDefault();
+  const pag = a.dataset.pagina;
+  try { if (location.hash !== '#' + pag) history.pushState(null, '', '#' + pag); } catch (err) { /* indirizzo non modificabile */ }
+  mostraPagina(pag);
+}));
+window.addEventListener('popstate', () => mostraPagina());
 
 function modifica(id) { const p = db.prenotazioni.find(x => x.id === id); apriDialog(p.campo, p); }
 
