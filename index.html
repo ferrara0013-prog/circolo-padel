@@ -64,11 +64,14 @@
   .voce:first-child { border-top: none; }
   .voce.info { cursor: default; color: var(--muted); font-style: italic; }
   .voce .d { flex: 1; }
+  .voce-sx { display: flex; align-items: center; gap: 10px; flex: 1; cursor: pointer; min-width: 0; }
   .voce .d small { display: block; color: var(--muted); font-size: 11.5px; }
   .voce .imp { font-weight: 700; white-space: nowrap; }
   .voce.sosp .imp { color: #8e44ad; }
   .voce input[type=checkbox] { width: 20px; height: 20px; flex: none; }
-  .varia { display: grid; grid-template-columns: 22px 1fr 140px 90px 30px; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .varia { display: grid; grid-template-columns: 22px 1fr 130px 80px 96px 30px; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .voce .v-met { flex: none; width: 96px; padding: 4px 6px; }
+  #cassaPerMetodo { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
   .varia input[type=checkbox] { width: 20px; height: 20px; }
   .varia input, .varia select { min-width: 0; width: 100%; }
   .cassa-fondo { display: flex; justify-content: space-between; align-items: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
@@ -358,7 +361,12 @@
     #frmCassa { display: flex; flex-direction: column; min-height: 100%; }
     #frmCassa .dlg-b { flex: 1; }
     .varia { grid-template-columns: 22px 1fr 80px 30px; }
-    .varia select { grid-column: 2 / 4; grid-row: 2; }
+    .varia .v-cat { grid-column: 2 / 3; grid-row: 2; }
+    .varia .v-met { grid-column: 3 / 5; grid-row: 2; }
+    .voce { flex-wrap: wrap; }
+    .voce-sx { flex: 1 1 100%; }
+    .voce .v-met { margin-left: 30px; }
+    .voce .imp { margin-left: auto; }
     #frmCassa .dlg-f { flex-wrap: wrap; }
     #frmSospeso { display: flex; flex-direction: column; min-height: 100%; }
     #frmSospeso .dlg-b { flex: 1; }
@@ -585,8 +593,8 @@
       <div id="cassaVarie"></div>
       <button type="button" class="small" id="btnAddVaria" style="align-self:flex-start">+ Aggiungi voce</button>
       <div class="cassa-fondo">
-        <label>Metodo <select id="cassaMetodo"><option>Contanti</option><option>POS</option><option>App</option></select></label>
-        <div class="cassa-tot">Totale selezionato <b id="cassaTot">€ 0,00</b></div>
+        <label>Metodo per tutte le voci <select id="cassaMetodo"><option>Contanti</option><option>POS</option><option>App</option></select></label>
+        <div class="cassa-tot">Totale selezionato <b id="cassaTot">€ 0,00</b><span id="cassaPerMetodo"></span></div>
       </div>
       <div class="err" id="errCassa"></div>
     </div>
@@ -1055,8 +1063,10 @@ function disegnaCassa() {
   const voci = vociCassa();
   $('cassaVoci').innerHTML = voci.map(v => v.info
     ? `<div class="voce info">${esc(v.info)}</div>`
-    : `<label class="voce ${v.sosp ? 'sosp' : ''}"><input type="checkbox" data-k="${v.k}" data-imp="${v.imp}" ${v.sel ? 'checked' : ''}>
-         <span class="d">${esc(v.d)}<small>${esc(v.sub)}</small></span><span class="imp">${eur(v.imp)}</span></label>`).join('')
+    : `<div class="voce ${v.sosp ? 'sosp' : ''}"><label class="voce-sx"><input type="checkbox" data-k="${v.k}" data-imp="${v.imp}" ${v.sel ? 'checked' : ''}>
+         <span class="d">${esc(v.d)}<small>${esc(v.sub)}</small></span></label>
+         <select class="v-met" title="Come paga questa voce">${METODI_CASSA.map(m => `<option ${m === $('cassaMetodo').value ? 'selected' : ''}>${m}</option>`).join('')}</select>
+         <span class="imp">${eur(v.imp)}</span></div>`).join('')
     || '<div class="voce info">Niente da pagare per questo giocatore</div>';
   totaleCassa();
 }
@@ -1068,6 +1078,7 @@ function aggiungiVaria() {
     <input type="text" placeholder="Descrizione, es. tubo palline" class="v-desc">
     <select class="v-cat">${MOV.entrate.categorie.map(c => `<option ${c === 'Vendita materiale' ? 'selected' : ''}>${c}</option>`).join('')}</select>
     <input type="number" min="0.01" step="0.01" placeholder="€" class="v-imp" inputmode="decimal">
+    <select class="v-met" title="Come paga questa voce">${METODI_CASSA.map(m => `<option ${m === $('cassaMetodo').value ? 'selected' : ''}>${m}</option>`).join('')}</select>
     <button type="button" class="small danger" title="Togli">✕</button>`;
   div.querySelector('button').addEventListener('click', () => { div.remove(); totaleCassa(); });
   $('cassaVarie').appendChild(div);
@@ -1081,18 +1092,29 @@ function varieCassa() {
     descrizione: d.querySelector('.v-desc').value.trim(),
     categoria: d.querySelector('.v-cat').value,
     importo: parseFloat(d.querySelector('.v-imp').value) || 0,
+    metodo: d.querySelector('.v-met').value,
   }));
 }
 function totaleCassa() {
-  const voci = [...$('cassaVoci').querySelectorAll('input:checked')].reduce((s, c) => s + parseFloat(c.dataset.imp), 0);
-  const varie = varieCassa().filter(v => v.sel).reduce((s, v) => s + v.importo, 0);
-  const tot = voci + varie;
+  const perMetodo = {};
+  $('cassaVoci').querySelectorAll('input:checked').forEach(c => {
+    const m = c.closest('.voce').querySelector('.v-met').value;
+    perMetodo[m] = (perMetodo[m] || 0) + parseFloat(c.dataset.imp);
+  });
+  varieCassa().filter(v => v.sel).forEach(v => perMetodo[v.metodo] = (perMetodo[v.metodo] || 0) + v.importo);
+  const tot = Object.values(perMetodo).reduce((s, x) => s + x, 0);
   $('cassaTot').textContent = eur(tot);
+  const dett = Object.entries(perMetodo).filter(([, x]) => x > 0);
+  $('cassaPerMetodo').textContent = dett.length > 1 ? dett.map(([m, x]) => `${m} ${eur(x)}`).join(' · ') : (dett.length ? dett[0][0] : '');
   $('btnIncassa').textContent = tot > 0 ? `Incassa ${eur(tot)}` : 'Incassa';
   const daSospendere = $('cassaVoci').querySelector('input[data-k="q"]:checked') || varieCassa().some(v => v.sel && v.importo > 0);
   $('btnSospendiCassa').disabled = !daSospendere;
 }
 $('dlgCassa').addEventListener('input', totaleCassa);
+$('cassaMetodo').addEventListener('change', () => {
+  $('dlgCassa').querySelectorAll('.v-met').forEach(sel => sel.value = $('cassaMetodo').value);
+  totaleCassa();
+});
 $('dlgCassa').addEventListener('change', e => { if (e.target !== $('cassaNome')) totaleCassa(); });
 
 // cambio del giocatore su questa quota
@@ -1116,19 +1138,18 @@ function controllaVarie() {
 $('frmCassa').addEventListener('submit', e => {
   e.preventDefault();
   const varie = controllaVarie(); if (!varie) return;
-  const scelte = [...$('cassaVoci').querySelectorAll('input:checked')].map(c => c.dataset.k);
+  const scelte = [...$('cassaVoci').querySelectorAll('input:checked')].map(c => ({ k: c.dataset.k, metodo: c.closest('.voce').querySelector('.v-met').value }));
   if (!scelte.length && !varie.length) return $('errCassa').textContent = 'Seleziona almeno una voce da pagare.';
-  const metodo = $('cassaMetodo').value;
   const p = db.prenotazioni.find(x => x.id === cassa.pid), q = p.quote[cassa.i];
   const uid = utenteDaNome(q.nome, q.utenteId);
-  scelte.forEach(k => {
+  scelte.forEach(({ k, metodo }) => {
     const [t, a, b] = k.split(':');
     if (t === 'q') { q.metodo = metodo; q.pagato = true; }
     else if (t === 'sq') registraSaldoQuota(a, +b, metodo);
     else if (t === 'sm') registraSaldoManuale(a, metodo);
   });
   varie.forEach(v => db.entrate.push({ id: nuovoId(), data: dataSel, ora: new Date().toTimeString().slice(0, 5),
-    descrizione: `${v.descrizione} · ${q.nome}`, categoria: v.categoria, importo: v.importo, metodo, utenteId: uid || undefined }));
+    descrizione: `${v.descrizione} · ${q.nome}`, categoria: v.categoria, importo: v.importo, metodo: v.metodo, utenteId: uid || undefined }));
   salvaDb(); $('dlgCassa').close(); render();
 });
 
